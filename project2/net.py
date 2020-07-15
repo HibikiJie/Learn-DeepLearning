@@ -7,6 +7,7 @@ class Net(torch.nn.Module):
         super(Net,self).__init__()
         self.dense_net121 = models.densenet121(pretrained=True)
         self.dense_net121.features[0] = torch.nn.Conv2d(2,64,kernel_size=(7,7),stride=(2,2),padding=(3,3),bias=True)
+        # print(self.dense_net121.classifier)
         self.dense_net121.classifier = torch.nn.Linear(1024,1024,bias=True)
         self.layer = torch.nn.Sequential(
             torch.nn.Linear(1024,512),
