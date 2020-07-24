@@ -149,7 +149,7 @@ $$
 
 使用pytorch的torch.utils.data.Dataset处理自己的数据集。
 
-创建一个类，继承于Dataset。
+创建一个类，继承于Dataset。，
 
 其中，只重载`__init__`函数、`__len__` 函数、`__getitem__`函数
 
@@ -623,3 +623,132 @@ torch_model.save("minist_net.pt")
 ![image-20200715152637977](D:\Learn-DeepLearning\image\image-20200715152637977.png)
 
 如此可在以后使用它
+
+
+
+#### （6）C++的调用
+
+进入pytorch官网：
+
+![image-20200717135646719](D:\Learn-DeepLearning\image\image-20200717135646719.png)
+
+下载pytorch的C++包
+
+解压至本地
+
+配置CMakeLists文件：
+
+```c++
+cmake_minimum_required(VERSION 3.14)//cmake的版本
+project(deeplearn)//项目名
+
+set(CMAKE_PREFIX_PATH D:/lib/libtorch-win-shared-with-deps-1.5.1+cpu/libtorch)//设置安装包的位置，这里为pytorch的文件位置
+set(OpenCV_DIR D:/opencv/build/x64/vc15/lib)//opencv的文件路径
+
+find_package(Torch REQUIRED)
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+
+add_executable(deeplearn  main.cpp)
+target_link_libraries(deeplearn ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+set_property(TARGET deeplearn PROPERTY CXX_STANDARD 11)
+
+if (MSVC)
+    file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
+    add_custom_command(TARGET deeplearn
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${TORCH_DLLS}
+            $<TARGET_FILE_DIR:deeplearn>)
+
+    file(GLOB OPENCV_DLLS "D:/opencv/build/x64/vc15/bin/*.dll")
+    add_custom_command(TARGET deeplearn
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${OPENCV_DLLS}
+            $<TARGET_FILE_DIR:deeplearn>)
+endif (MSVC)
+```
+
+编写C++的代码：
+
+```c++
+#include <iostream>
+#include <torch/torch.h>
+#include <torch/script.h>
+#include<opencv2/opencv.hpp>
+#include <vector>
+#include <string>
+
+int main() {
+    try {
+        //读取图片
+        cv::Mat image = cv::imread("7.jpg", cv::IMREAD_GRAYSCALE);
+
+        //图片数据转换为tensor数据，并把数据转换为float
+        torch::Tensor tensor_image = torch::from_blob(image.data, {1, image.rows * image.cols}, torch::kByte).toType(
+                torch::kFloat);
+
+        tensor_image /= 255.;
+        std::cout << tensor_image.sizes() << std::endl;
+
+        //读取模型
+        auto module = torch::jit::load("mnist.pt");
+//
+        std::vector<torch::jit::IValue> inputs;
+        inputs.push_back(tensor_image);
+//
+        auto rst = module.forward(inputs).toTensor();
+//
+        std::cout << rst << std::endl;
+        std::cout << torch::argmax(rst, 1) << std::endl;
+
+    } catch (const c10::Error &e) {
+        std::cerr << e.what();
+        return -1;
+    }
+
+    return 0;
+}
+```
+
+即可使用自己所保存的模型。
+
+运行结果：
+
+```c++
+[1, 784]
+Columns 1 to 6 3.4889e-15  1.6104e-12  7.0945e-08  1.4432e-12  5.9674e-11  3.6124e-14
+
+Columns 7 to 10 1.0000e+00  1.4798e-15  4.0512e-08  8.2507e-12
+[ CPUFloatType{1,10} ]
+ 6
+[ CPULongType{1} ]
+```
+
+图片识别的结果为6，正确。
+
+
+
+### 8、补充
+
+torch的`torchvision.transforms.ToPILImage()`类可以提供一个类，将tensor类型的C X H X W数据转变为PIL的图片对象
+
+```python
+from torchvision import transforms
+to_PIL_image = transforms.ToPILImage()
+img = to_PIL_image(img)
+```
+
+
+
+`torchvision.transforms.ToTensor`可以将PIL对象或是numpy.ndarray (H x W x C)的图片格式，转变为torch.FloatTensor形状为(C x H x W)并做归一化处理。
+
+```python
+to_tensorer = transforms.ToTensor
+img = to_tensorer(img)
+```
+
+
+

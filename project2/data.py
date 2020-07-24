@@ -14,9 +14,8 @@ class SunDataset(Dataset):
             img_dir = f"{root}/{sub_dir}/{taget}"
             for img_filename in os.listdir(img_dir):
                 img_path = f"{img_dir}/{img_filename}"
-                one_hot = torch.zeros(3)
+                one_hot = torch.zeros(3,dtype=torch.float32)
                 one_hot[int(taget)-1] = 1
-                one_hot = one_hot.type(torch.FloatTensor)
                 self.dataset.append((img_path,one_hot))
 
     def __len__(self):
@@ -28,7 +27,10 @@ class SunDataset(Dataset):
         taget = data[1]
         return img_data,taget
 
-sun_class = SunDataset()
 
-print(sun_class[0])
-print(sun_class[10000])
+if __name__ == '__main__':
+
+    sun_class = SunDataset()
+
+    print(sun_class[0])
+    print(sun_class[2000])
