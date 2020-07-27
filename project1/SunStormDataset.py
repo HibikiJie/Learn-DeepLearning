@@ -19,7 +19,7 @@ class SunStormDataset(Dataset):
         self.weights = [20 if int(target.item()) == 1 else 1 for img,para,target in self.dataset]
         print('权重初始化完成')
         self.simpler = WeightedRandomSampler(self.weights,len(self.dataset),True)
-        print(self.weights)
+        # print(self.weights)
 
     def __len__(self):
         return len(self.dataset)
@@ -27,7 +27,7 @@ class SunStormDataset(Dataset):
     def __getitem__(self, item):
         file_path,para_data,target_data = self.dataset[item]
         img = torch.load(file_path)
-        return img,para_data,target_data
+        return img[0],para_data[0],target_data
 
 
 if __name__ == '__main__':
@@ -35,4 +35,7 @@ if __name__ == '__main__':
     dataset = SunStormDataset()
     data_loader = DataLoader(dataset,10,sampler=dataset.simpler)
     for img,para,target in data_loader:
-        print(target.sum())
+        print(img.shape)
+        print(para.shape)
+        print(target.shape)
+        break

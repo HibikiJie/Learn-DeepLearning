@@ -1,6 +1,8 @@
 import torch
 from torchvision.models import densenet121
-
+from torch import jit
+import cv2
+import numpy
 
 class Net(torch.nn.Module):
 
@@ -28,14 +30,42 @@ class Net(torch.nn.Module):
         h = self.cnn(x1)
         x2 = self.fc1(x2)
         x = torch.cat([h,x2],dim=1)
-        print(x.shape)
+        # print(x.shape)
         return self.fc2(x)
 
 
 
 if __name__ == '__main__':
-    net = Net()
-    print(net.parameters)
-    x1 = torch.randn(2, 1, 224, 224)
-    x2 = torch.randn(2,10)
-    print(net(x1,x2))
+    yes = 0
+    no = 0
+
+    model = Net()
+    model.load_state_dict(torch.load('SunStorm_net'))
+    with open('test_input_para.txt','r') as f:
+        file_data = f.read().split()
+    a = len(file_data)//11
+    file_name = []
+    file_para = []
+    f = open('out.txt','w')
+    for i in range(a):
+        file_name.append(file_data[i*11])
+        file_para.append([file_data[11*i+1:11*i+11]])
+    for img_name,para in zip(file_name,file_para):
+        img = cv2.imread(f'D:/sun/test_jpg_input/{img_name}',0)
+        img = cv2.resize(img,(224,224))/255
+        img = torch.tensor([[numpy.array(img,dtype=numpy.float32)]])
+        para = torch.tensor(numpy.array(para,dtype=numpy.float32))
+
+        out = model(img,para)
+        print(out.item())
+        if out.item() > 0.5:
+            yes +=1
+            outtt = '1'
+            f.write('{}  {}\n'.format(img_name,outtt))
+        else:
+            no += 1
+            outtt = '0'
+            f.write('{}  {}\n'.format(img_name, outtt))
+        print('{}  {}'.format(img_name,outtt))
+
+    print(yes,no)

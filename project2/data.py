@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset,WeightedRandomSampler,DataLoader
 import torch
 import os
 
@@ -17,6 +17,14 @@ class SunDataset(Dataset):
                 one_hot = torch.zeros(3,dtype=torch.float32)
                 one_hot[int(taget)-1] = 1
                 self.dataset.append((img_path,one_hot))
+        self.weights = []
+        for i in range(4007):
+            self.weights.append(15)
+        for i in range(5353):
+            self.weights.append(12)
+        for i in range(2107):
+            self.weights.append(20)
+        self.simpler = WeightedRandomSampler(self.weights,len(self.dataset),True)
 
     def __len__(self):
         return len(self.dataset)
@@ -32,5 +40,7 @@ if __name__ == '__main__':
 
     sun_class = SunDataset()
 
-    print(sun_class[0])
-    print(sun_class[2000])
+    dataload = DataLoader(sun_class,60,sampler=sun_class.simpler)
+    for i in dataload:
+        print(i[1].sum(dim=0))
+        exit()

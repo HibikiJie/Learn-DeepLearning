@@ -729,6 +729,63 @@ Columns 7 to 10 1.0000e+00  1.4798e-15  4.0512e-08  8.2507e-12
 
 图片识别的结果为6，正确。
 
+### 9、如何正确地使用Google Colab
+
+Colab，它支持GPU，而且是免费使用。
+
+Colaboratory 是一个免费的 Jupyter 笔记本环境，不需要进行任何设置就可以使用，并且完全在云端运行。
+ 借助 Colaboratory，可以编写和执行代码、保存和共享分析结果，以及利用强大的计算资源，所有这些都可通过浏览器免费使用。
+
+#### （1）访问该网站
+
+网址：https://colab.research.google.com/notebooks/welcome.ipynb
+
+#### （2）使用GPU
+
+新建笔记本，登录[谷歌云盘](https://drive.google.com/drive/my-drive)。
+
+![image-20200727101112662](D:\Learn-DeepLearning\image\image-20200727101112662.png)
+
+![image-20200727101607924](D:\Learn-DeepLearning\image\image-20200727101607924.png)
+
+更改运行时类型。
+
+![image-20200727101640620](D:\Learn-DeepLearning\image\image-20200727101640620.png)
+
+更改为GPU，即可使用谷歌的GPU。
+
+#### （3）运行代码
+
+##### 		3.1挂载云盘
+
+将需要执行的文件，数据上传至云盘。
+
+Colab的运行原理实际上就是给你分配一台远程的带GPU的主机，所以它的原始路径不是你的云盘（也就是你的代码文件）所在的路径。所以第一步我们先要把谷歌云盘挂载带到那台远程主机上：
+
+```python
+from google.colab import drive
+drive.mount('/content/gdrive')
+```
+
+输入并运行这行代码，会出来一个框让你输验证码，按提示完成即可。
+
+##### 		3.2 更改运行目录
+
+连接你的项目所在的文件即可
+
+```python
+import os
+os.chdir("/content/gdrive/My Drive/your_progect")
+```
+
+##### 		3.3 文件运行
+
+然后使用命令行运行，运行前注意路径设置是否正确。如下：
+
+```python
+! python example.py
+```
+
 
 
 ### 8、补充
