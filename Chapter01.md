@@ -8,7 +8,7 @@
 
 ### 1、神经元
 
-![img](image\b783af0ad19214c94498e94414f5c501.jpg)
+![img](image/b783af0ad19214c94498e94414f5c501.jpg)
 
 <img src="D:\Learn-DeepLearning\image\perceptron.jpg" alt="img"  />
 
