@@ -120,9 +120,137 @@ $Ksize_{i}$本层卷积核的大小。
 
 ## 7、单目标检测
 
-首先获取数据集，使用`background_image_downloads.py`文件下载
+### （1）制作数据
+
+首先获取数据集，使用`background_image_downloads.py`文件爬取各种图片。
+
+将小黄人随机地粘贴在图片上，并做好标记。
+
+### （2）编写网络
+
+```python
+import torch
+class Net(torch.nn.Module):
+    def __init__(self):
+        super(Net,self).__init__()
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(3,16,3,1,1),
+            torch.nn.MaxPool2d(kernel_size=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(16,32,3,1,1),
+            torch.nn.MaxPool2d(2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32,64,3,1,1),
+            torch.nn.MaxPool2d(2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(64,128,3,1),
+            torch.nn.MaxPool2d(2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(128,256,3,1),
+            torch.nn.MaxPool2d(2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(256,256,3,1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(256,512,3,1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(512,1024,3,1),
+            torch.nn.ReLU(),
+        )
+        self.classifier = torch.nn.Sequential(
+            torch.nn.Linear(1024, 4)
+        )
+    def forward(self,x):
+        return self.classifier(self.features(x).reshape(-1,1024))
+```
+
+### （3）加载数据
+
+```python
+from torch.utils.data import Dataset
+from torchvision.transforms import ToTensor
+from PIL import Image
+import torch,numpy
+class DataYellow(Dataset):
+    def __init__(self,root='D:/data/chapter2/shuju'):
+        self.root = root
+        super(DataYellow, self).__init__()
+        self.dataset = os.listdir(self.root)
+        self.totensor = ToTensor()
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self,item):
+        file_name = self.dataset[item]
+        img = Image.open(f"{self.root}/{file_name}")
+        img = self.totensor(img)
+        target = file_name.split(".")[1:5]
+        target = torch.tensor(numpy.array(target,dtype=numpy.float32))/300
+        return img,target
+```
+
+### （4）训练
+
+```python
+from Chapter02.C02net import Net
+from Chapter02.C02data import DataYellow
+from torch.utils.data import DataLoader
+import torch,os
+import tqdm
+
+class Train():
+
+    def __init__(self):
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print(self.device)
+
+        self.dataset = DataYellow()
+        self.data_loader = DataLoader(self.dataset,100,True)
+
+        self.net = Net().to(self.device)
+        self.optim = torch.optim.Adam(self.net.parameters(),0.0001)
+        self.loss_function = torch.nn.MSELoss().to(self.device)
+        if os.path.exists('D:/data/chapter2/chapter02'):
+            self.net.load_state_dict(torch.load('D:/data/chapter2/chapter02'))
 
 
+    def __call__(self):
+        print('训练开始')
+        for epoch in range(100):
+            loss_sum = 0
+            for img,target in tqdm.tqdm(self.data_loader):
 
-![image-20200727105226229](C:\Users\lieweiai\AppData\Roaming\Typora\typora-user-images\image-20200727105226229.png)
+                out = self.net(img.to(self.device))
+                loss = self.loss_function(out,target.to(self.device))
 
+                self.optim.zero_grad()
+                loss.backward()
+                self.optim.step()
+                loss_sum += loss.cpu().detach().item()
+            print(epoch,loss_sum/len(self.data_loader))
+            torch.save(self.net.state_dict(),'D:/data/chapter2/chapter02')
+```
+
+进行训练：
+
+```python
+if __name__ == '__main__':
+    train = Train()
+    train()
+```
+
+![image-20200727105226229](D:\Learn-DeepLearning\image\image-20200727105226229.png)
+
+完成训练。
+
+测试结果。
+
+![GIF 2020-7-27 14-43-19](D:\Learn-DeepLearning\image\c02test.gif)
+
+测试完成。能较好的完成目标检测。
+
+然而也是存在问题的。譬如，目标不在是这样方正的之后：
+
+![GIF 2020-7-27 14-47-57](D:\Learn-DeepLearning\image\c02test2.gif)
+
+可以看到，输出框依旧是正方形，这是由于训练集的所有标签是方形所致。
