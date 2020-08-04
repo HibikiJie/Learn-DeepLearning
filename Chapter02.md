@@ -35,7 +35,7 @@ $$
 ## 2、卷积尺寸与计算量
 
 $$
-L_{out}=\left \lfloor \frac{L_{in}+2\times padding-dilation\times (kernel_{size}-1)-1}{sride}+1 \right \rfloor
+L_{out}=\left \lfloor \frac{L_{in}+2\times padding-dilation\times (kernel_{size}-1)-1}{stride}+1 \right \rfloor
 $$
 
 卷积尺寸的计算为公式（2）
