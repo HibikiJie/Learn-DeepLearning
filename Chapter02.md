@@ -243,6 +243,8 @@ if __name__ == '__main__':
 
 完成训练。
 
+### （5）测试
+
 测试结果。
 
 ![GIF 2020-7-27 14-43-19](D:\Learn-DeepLearning\image\c02test.gif)

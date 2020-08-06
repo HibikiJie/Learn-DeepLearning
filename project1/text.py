@@ -7,7 +7,7 @@ files = os.listdir(root)
 
 for i,file in enumerate(files):
     if file.endswith('.jpg'):
-        # print(file)
+        print(file)
         file_name = '2' + str(i).rjust(5,'0')
         new_name = f"{root}/{file_name}.jpg"
         old_name = f'{root}/{file}'

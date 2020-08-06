@@ -1,5 +1,5 @@
-import torch
+import random
+import cv2
 
-a = torch.tensor([1,2,3,4])
-print(a[5:])
-print(a[5])
+
+print(float('0.25'))

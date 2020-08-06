@@ -10,12 +10,12 @@ import torch
 
 
 def compute_iou(box1, box2, is_min=False):
-    '''
+    """
     计算两候选框之间的交并比
     :param box1: 第一个候选框
     :param box2: 第二个候选框
     :return: 两候选框之间的交并比
-    '''
+    """
     area1 = (box1[2] - box1[0]) * (box1[3] - box1[1])
     area2 = (box2[:, 2] - box2[:, 0]) * (box2[:, 3] - box2[:, 1])
     x1 = torch.max(box1[0], box2[:, 0])
@@ -31,12 +31,12 @@ def compute_iou(box1, box2, is_min=False):
 
 
 def non_maximum_suppression(predict_dict, threshold, is_min=False):
-    '''
+    """
     非极大值抑制
     :param predict_dict: 输入的候选框
     :param threshold: 交并比的阈值
     :return: 非极大值抑制之后的候选框们
-    '''
+    """
     '''阈值设定'''
     threshold = threshold
 
@@ -66,4 +66,4 @@ if __name__ == '__main__':
     predict_dict = torch.tensor([[59, 120, 137, 368, 0.124648176],
                                  [221, 89, 369, 367, 0.35818103],
                                  [54, 154, 148, 382, 0.13638769]])
-    print(non_maximum_suppression(predict_dict, 0.8, False))
+    print(non_maximum_suppression(predict_dict, 0.6, False))
