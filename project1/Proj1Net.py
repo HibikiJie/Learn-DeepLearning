@@ -1,5 +1,6 @@
 from torch import nn
 import torch
+import os
 
 
 class PNet(nn.Module):
@@ -25,6 +26,20 @@ class PNet(nn.Module):
     def forward(self, enter):
         enter = self.conv1(enter)
         return self.classification(enter), self.regression(enter)
+
+    def save_parameters(self, path='D:/data/object1', file_name='pnet.pt'):
+        if os.path.exists(path):
+            torch.save(self.state_dict(), f'{path}/{file_name}')
+            print('参数保存成功')
+        else:
+            print('参数保存失败')
+
+    def load_parameters(self, path='D:/data/object1', file_name='pnet.pt'):
+        if os.path.exists(f'{path}/{file_name}'):
+            self.load_state_dict(torch.load(f'{path}/{file_name}'))
+            print('参数加载成功')
+        else:
+            print('参数加载失败')
 
 
 class RNet(nn.Module):
@@ -55,6 +70,20 @@ class RNet(nn.Module):
     def forward(self, enter):
         enter = self.full_connect(self.convolution(enter).reshape(-1, 576))
         return self.classification(enter), self.regression(enter)
+
+    def save_parameters(self, path='D:/data/object1', file_name='rnet.pt'):
+        if os.path.exists(path):
+            torch.save(self.state_dict(), f'{path}/{file_name}')
+            print('参数保存成功')
+        else:
+            print('参数保存失败')
+
+    def load_parameters(self, path='D:/data/object1', file_name='rnet.pt'):
+        if os.path.exists(f'{path}/{file_name}'):
+            self.load_state_dict(torch.load(f'{path}/{file_name}'))
+            print('参数加载成功')
+        else:
+            print('参数加载失败')
 
 
 class ONet(nn.Module):
@@ -90,9 +119,23 @@ class ONet(nn.Module):
         enter = self.fully_connect(self.convolution(enter).reshape(-1, 1152))
         return self.classification(enter), self.regression(enter)
 
+    def save_parameters(self, path='D:/data/object1', file_name='onet.pt'):
+        if os.path.exists(path):
+            torch.save(self.state_dict(), f'{path}/{file_name}')
+            print('参数保存成功')
+        else:
+            print('参数保存失败')
+
+    def load_parameters(self, path='D:/data/object1', file_name='onet.pt'):
+        if os.path.exists(f'{path}/{file_name}'):
+            self.load_state_dict(torch.load(f'{path}/{file_name}'))
+            print('参数加载成功')
+        else:
+            print('参数加载失败')
+
 
 if __name__ == '__main__':
-    x = torch.randn(1, 3, 12, 12)
+    x = torch.randn(8, 3, 48, 48)
 
-    net = PNet()
-    print(net(x)[0].shape,net(x)[1].shape)
+    net = ONet()
+    print(net(x)[0].shape, net(x)[1].shape)

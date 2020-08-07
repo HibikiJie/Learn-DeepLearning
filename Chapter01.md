@@ -585,7 +585,7 @@ TensorBoard 2.2.2 at http://localhost:6006/ (Press CTRL+C to quit)
 
 ![image-20200715150513856](D:\Learn-DeepLearning\image\image-20200715150513856.png)
 
-#### （4）网络模型参数的保存
+#### （4）网络模型参数的保存和加载“
 
 `torch.save(net.state_dict(),path)`:
 
