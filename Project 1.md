@@ -317,7 +317,7 @@ class FaceDataSet(Dataset):
 
 按照[MTCNN网络](#3、MTCNN网络结构)中[P-Net](#P-Net)、[R-Net](#R-Net)、[O-Net](#O-Net)网络结构编写模型代码
 
-详细代码见**Proj1Net.py**
+详细代码见[**Proj1Net.py**](project1/Proj1Net.py)
 
 
 
