@@ -4,7 +4,7 @@
 
 # 二、卷积神经网络
 
-![img](D:\Learn-DeepLearning\image\juanji.jpg)
+![img](image\juanji.jpg)
 
 上一章，全连接网络的结构如上图所示。
 

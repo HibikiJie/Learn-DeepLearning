@@ -32,7 +32,7 @@
 
 | Project | Topic                                                        | Description        |
 | ------- | ------------------------------------------------------------ | ------------------ |
-| 1       | [mtcnn](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Project%201.md) | 多任务级联卷积网络 |
+| 1       | [MTCNN](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Project%201.md) | 多任务级联卷积网络 |
 |         |                                                              |                    |
 |         |                                                              |                    |
 
