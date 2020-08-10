@@ -135,7 +135,7 @@ class ONet(nn.Module):
 
 
 if __name__ == '__main__':
-    x = torch.randn(8, 3, 48, 48)
+    x = torch.randn(1, 3, 24, 24)
 
-    net = ONet()
-    print(net(x)[0].shape, net(x)[1].shape)
+    net = PNet()
+    print(net(x)[1].shape)

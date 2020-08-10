@@ -8,7 +8,7 @@ import torch
 
 class Trainer(object):
 
-    def __init__(self, net, image_size, logs_path='D:/data/object1/logs'):
+    def __init__(self, net, image_size, data_path='D:/data/object1/train',logs_path='D:/data/object1/logs'):
         """
         :param net:
         :param image_size:
@@ -26,8 +26,8 @@ class Trainer(object):
         self.net.to(self.device)
 
         '''实例化数据加载集'''
-        self.data_set = FaceDataSet(image_size=image_size)
-        self.data_loader = DataLoader(self.data_set, 2000, True)
+        self.data_set = FaceDataSet(path=data_path,image_size=image_size)
+        self.data_loader = DataLoader(self.data_set, 512, True)
 
         '''实例化summary_writer（摘要作家）'''
         self.summary_writer = SummaryWriter(logs_path)
@@ -37,7 +37,8 @@ class Trainer(object):
         self.mse_loss = torch.nn.MSELoss().to(self.device)  # 训练偏移量的损失函数
 
         '''创建优化器'''
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.00001)
+        self.optimizer = torch.optim.Adam(self.net.parameters())
+        # self.optimizer = torch.optim.SGD(self.net.parameters(),lr=0.00001)
 
         print('训练器初始化完成')
 
@@ -52,8 +53,8 @@ class Trainer(object):
                 out_confidence, out_coordinate = self.net(image)
 
                 '''变换形状，使得P网络能够计算损失'''
-                # out_confidence = out_confidence.reshape(-1, 1)
-                # out_coordinate = out_coordinate.reshape(-1, 4)
+                out_confidence = out_confidence.reshape(-1, 1)
+                out_coordinate = out_coordinate.reshape(-1, 4)
 
                 '''计算置信度的损失'''
                 category_mask = torch.where(confidence < 1.5)[0]
@@ -71,7 +72,6 @@ class Trainer(object):
                 loss.backward()  # 反向传播求梯度
                 self.optimizer.step()  # 优化网络参数
 
-                count += 1
                 loss_txt = loss.detach().cpu().item()
 
                 '''记录损失'''
@@ -80,6 +80,7 @@ class Trainer(object):
                 '''保存数据'''
                 if count % 100 == 0:
                     self.net.save_parameters()
+                count += 1
 
 
 if __name__ == '__main__':

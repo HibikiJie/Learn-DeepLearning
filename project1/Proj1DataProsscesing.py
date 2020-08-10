@@ -66,7 +66,7 @@ origin_image_path = 'D:/data/object1/img_celeba'
 origin_txt_path = 'D:/data/object1/list_bbox_celeba.txt'
 
 '''文件的存储地址'''
-save_path = 'D:/data/object1/train'
+save_path = 'c:/data/'
 
 '''读取标注信息'''
 with open(origin_txt_path, 'r') as file:
@@ -77,7 +77,7 @@ for i in range(len(txt) // 5):
 # print(len(datas))
 # exit()
 '''生成不同尺寸大小的图片'''
-for face_size in [48, 24, 12]:
+for face_size in [24, 12]:
     print('生成 %i x %i 的图片' % (face_size, face_size))
 
     '''图片的存储地址'''
@@ -126,7 +126,7 @@ for face_size in [48, 24, 12]:
         '''生成正样本'''
         count = 0  # 生成数量计数器
         try_count = 0
-        while count < 5:
+        while count < 1:
             '''求得人脸标注框的中心点'''
             center_x = x1 + w // 2
             center_y = y1 + h // 2
@@ -174,7 +174,7 @@ for face_size in [48, 24, 12]:
         '''生成部分样本'''
         count = 0  # 生成数量计数器
         try_count = 0
-        while count < 5:
+        while count < 1:
             '''求得人脸标注框的中心点'''
             center_x = x1 + w // 2
             center_y = y1 + h // 2
@@ -221,7 +221,7 @@ for face_size in [48, 24, 12]:
         '''生成负样本'''
         count = 0
         try_count = 0
-        while count < 5:
+        while count < 1:
             '''求得人脸标注框的中心点'''
             image = Image.open(image_path)
             width,height = image.size

@@ -240,13 +240,13 @@ CelebA是CelebFaces Attribute的缩写，意即名人人脸属性数据集，其
 
 新建
 
-![image-20200731162322927](D:\Learn-DeepLearning\image\image-20200731162322927.png)
+![image-20200731162322927](image\image-20200731162322927.png)
 
-![image-20200731162649117](D:\Learn-DeepLearning\image\image-20200731162649117.png)
+![image-20200731162649117](image\image-20200731162649117.png)
 
 选择项目类型，图片所在文件夹，分类的值，这里只需要人脸的位置，则类别值仅为人脸。
 
-![image-20200731162814877](D:\Learn-DeepLearning\image\image-20200731162814877.png)
+![image-20200731162814877](image\image-20200731162814877.png)
 
 给人脸画上矩形框，即可完成标注。
 
@@ -273,3 +273,119 @@ CelebA是CelebFaces Attribute的缩写，意即名人人脸属性数据集，其
 训练样本比例，负样本：正样本：部分正样本：地标=3:1:1:2
 
 nn
+
+完成人脸标注后，切记**对数据集副本**进行操作，**不要对原始数据集进行任何操作**。以免丢失数据。
+
+### 制作样本。
+
+训练模型时，使用的是，12x12、24x24、48x48规格的图片，且为单目标检测。所以，需要从原图片上，扣取这样的样本，并自动计算出归一化之后的坐标标签值。
+
+详细代码见**Proj1DataProsscesing.py**
+
+
+
+
+
+## 6、数据集
+
+制作数据集，同样的需要初始化，在\_\_init\_\_()方法中创建，数据集，加载数据的读取目录以及标签。然后重写\_\_len\_\_()方法，以及\__getitem__()方法。
+
+详细代码见**Proj1FaceDataSet.py**
+
+```python
+from torch.utils.data import Dataset
+from torchvision.transforms import ToTensor
+from PIL import Image
+from time import time
+import torch
+
+
+class FaceDataSet(Dataset):
+
+    def __init__(self, path='D:/data/object1/train',image_size='48'):
+        super(FaceDataSet, self).__init__()
+        ''' '''
+
+    def __len__(self):
+        return len(self.data_set)
+
+    def __getitem__(self, item):
+        ''' '''
+```
+
+## 7、构建模型
+
+按照[MTCNN网络](#3、MTCNN网络结构)中[P-Net](#P-Net)、[R-Net](#R-Net)、[O-Net](#O-Net)网络结构编写模型代码
+
+详细代码见**Proj1Net.py**
+
+
+
+## 8、编写训练器
+
+在训练损失时，变换输出的形状`out_confidence = out_confidence.reshape(-1, 1)`、`out_coordinate = out_coordinate.reshape(-1, 4)`，如此可以使代码满足三个模型的同时使用。同时，在输出和标签中，分别取出部分样本和正样本训练回归、负样本和正样本训练分类能力。
+
+详细代码见**Proj1Trainer.py**
+
+训练完网络......
+
+![image-20200810170200342](D:\Learn-DeepLearning\image\image-20200810170200342.png)
+
+其中O网络的损失曲线见上图所示。至此网络的参数训练完成。
+
+
+
+## 9、正向使用过程
+
+编写一个探索者（Explorer）的类，其中包含初始化、探索、p网络探索、r网络探索、o网络探索、以及扣取图片等方法。
+
+详细代码见**Proj1Explorer.py**、**Proj1GUI.py**、**Proj1Main.py**
+
+测试使用结果：
+
+```python
+    def catch_face(path_txt):
+        image = Image.open(path_txt)
+        image = image.convert('RGB')
+        boxes = self.explorer.explore(image)
+        if boxes.shape[0] == 0:
+            pass
+        else:
+            cors = boxes[:, 0:4]
+            draw = ImageDraw.Draw(image)
+            for cor in cors:
+                draw.rectangle(tuple(cor), outline='red', width=2)
+            image.show()
+```
+
+![image-20200810162916621](D:\Learn-DeepLearning\image\image-20200810162916621.png)
+
+结果显示，能完成全部的人脸检测
+
+观察输出结果：
+
+```python
+tensor([[234.5096,  31.3873, 273.6535,  86.5899,   1.0000],
+        [299.9764, 142.6213, 352.2200, 216.3686,   1.0000],
+        [301.3135,  34.9491, 338.5693,  87.4093,   1.0000],
+        [191.6967, 132.7279, 234.9627, 194.1653,   1.0000],
+        [125.6473,  49.3581, 166.0767, 106.7610,   1.0000]])
+```
+
+所有人脸的置信度均为1
+
+```python
+P网络监测时间： 0.12192559242248535
+torch.Size([3581, 5])
+NMS_COST_TIME: 0.354780912399292
+p: 0.47870540618896484
+torch.Size([677, 5])
+torch.Size([292, 5])
+NMS_COST_TIME: 0.05196738243103027
+r: 0.7785205841064453
+torch.Size([8, 5])
+NMS_COST_TIME: 0.00299835205078125
+o: 0.9244303703308105
+```
+
+可见网络的前向过程并不太花时间，计算时间主要消耗在了非极大值抑制上。

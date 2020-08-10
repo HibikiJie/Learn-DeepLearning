@@ -7,7 +7,7 @@ import torch
 4. 计算A与候选框列表中的所有框的IoU值，删除大于阈值的候选框
 5. 重复上述过程，直到候选框列表为空，返回输出列表
 '''
-
+import time
 
 def compute_iou(box1, box2, is_min=False):
     """
@@ -22,6 +22,7 @@ def compute_iou(box1, box2, is_min=False):
     y1 = torch.max(box1[1], box2[:, 1])
     x2 = torch.min(box1[2], box2[:, 2])
     y2 = torch.min(box1[3], box2[:, 3])
+
     intersection_area = torch.max(torch.tensor(0, dtype=torch.float32), x2 - x1) * torch.max(
         torch.tensor(0, dtype=torch.float32), y2 - y1)
     if is_min:
@@ -37,6 +38,10 @@ def non_maximum_suppression(predict_dict, threshold, is_min=False):
     :param threshold: 交并比的阈值
     :return: 非极大值抑制之后的候选框们
     """
+    print(predict_dict.shape)
+    start = time.time()
+    if predict_dict.shape[0] == 1:
+        return torch.tensor([[]])
     '''阈值设定'''
     threshold = threshold
 
@@ -58,7 +63,8 @@ def non_maximum_suppression(predict_dict, threshold, is_min=False):
 
         '''保留下小于阈值的候选框的位置索引'''
         order = order[torch.where(iou < threshold)[0] + 1]
-
+    end = time.time()
+    print('NMS_COST_TIME:',end-start)
     return predict_dict[[picked_boxes]]
 
 
@@ -66,4 +72,9 @@ if __name__ == '__main__':
     predict_dict = torch.tensor([[59, 120, 137, 368, 0.124648176],
                                  [221, 89, 369, 367, 0.35818103],
                                  [54, 154, 148, 382, 0.13638769]])
-    print(non_maximum_suppression(predict_dict, 0.6, False))
+    y= torch.randn(10000,5).cuda()
+    start =time.time()
+    x = non_maximum_suppression(y, 0.6, False)
+    end = time.time()
+    print(x.cpu())
+    print(end - start)
