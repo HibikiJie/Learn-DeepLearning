@@ -1,6 +1,5 @@
 import imageio
 import os
-
 def create_gif(image_list, gif_name, duration=1.0):
     '''
     :param image_list: 这个列表用于存放生成动图的图片
@@ -29,7 +28,7 @@ if __name__ == '__main__':
     for i in range(0,100):
         file_name = f'D:/data/chapter3/image/epoch{i}.png'
         images.append(file_name)
-    for i in range(100, 999,4):
+    for i in range(100, 600,4):
         file_name = f'D:/data/chapter3/image/epoch{i}.png'
         images.append(file_name)
     main(images)

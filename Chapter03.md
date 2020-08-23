@@ -149,4 +149,166 @@ $$
 
 ![image-20200821094047588](image/image-20200821094047588.png)
 
-最终特征图收敛如上图所示。
+最终特征图收敛如上图所示。如需收敛为上图样，需无偏置。
+
+最终使用，是使用余弦相似度进行比较。**二范数归一化的欧式距离等价于余弦相似度。**
+
+
+
+## 4、孪生网络
+
+孪生神经网络(Siamese Network)将输入映射为一个特征向量，使用两个向量之间的“距离”（L1 Norm）来表示输入之间的差异（图像语义上的差距）。
+
+![img](image/18634167-027dbbafe46a0c73)
+
+Siamese Network有两个结构相同，且共享权值的子网络。分别接收两个输入X1X1与X2X2，将其转换为向量Gw(X1)与Gw(X2)，再通过某种距离度量的方式计算两个输出向量的距离Ew。
+
+在孪生神经网络（siamese network）中，其采用的损失函数是contrastive loss，这种损失函数可以有效的处理孪生神经网络中的paired data的关系。contrastive loss的表达式如下：
+$$
+L(W,(Y,X_{1},X_{2}))=\frac{1}{2N}\sum_{n=1}^{N}YD_{W}^{2}+(1-Y)max(m-D_{w},0)^{2}
+$$
+
+$$
+D_{W}(X_{1},X_{W})=\left \| X_{1}-X_{2} \right \|_{2}=(\sum_{i=1}^{P}(X_{1}^{i}-X_{2}^{i})^{2})^{\frac{1}{2}}
+$$
+
+代表两个样本特征![X_1](https://math.jianshu.com/math?formula=X_1)和![X_2](https://math.jianshu.com/math?formula=X_2) 的欧氏距离（二范数）P 表示样本的特征维数，Y 为两个样本是否匹配的标签，Y=1 代表两个样本相似或者匹配，Y=0 则代表不匹配，m 为设定的阈值，N 为样本个数。
+
+这里设置了一个阈值ｍ，表示我们只考虑不相似特征欧式距离在０～ｍ之间的，当距离超过ｍ的，则把其loss看做为０(即不相似的特征离的很远，其loss应该是很低的；而对于相似的特征反而离的很远，我们就需要增加其loss，从而不断更新成对样本的匹配程度
+
+该网络的缺点为，**速度慢**。但启发了，**比较特征向量的差距**的思想。
+
+
+
+## 5、Triplet Loss
+
+![img](image/20170814123212482)
+
+Triplet Loss即三元组损失分为了Anchor、Negative、Positive需要三种数据，即三张图片。Anchor为锚点，参考点。Positive与锚点同属于一类样本。而Negative则和Anchor为不同类的样本。也就是说，让正样本(Positive)更加靠近锚点(Anchor)，而负样本(Negative)远离锚点(Anchor)。
+$$
+L_{triplet\ loss}=\sum_{i}^{N}\left [ \left \| f(x_{i}^{a})-f(x_{i}^{p}) \right \|_{2}^{2}- \left \|f(x_{i}^{a})-f(x_{i}^{n})  \right \|_{2}^{2}+\alpha \right ]_{+}
+$$
+该损失为，正样本到锚点的距离减去负样本到锚点的距离加上$\alpha$ 。
+
+另外这里距离用欧式距离度量，+表示[]内的值大于零的时候，取该值为损失，小于零的时候，损失为零。
+
+**$\alpha$ 值设置的越小，loss 很容易趋近于 0 ，但很难区分相似的图像。$\alpha$  值设置的越大，loss 值较难趋近于 0，甚至导致网络不收敛，但可以较有把握的区分较为相似的图像。**
+
+训练的时候，传入的数据，需要正样本到锚点距离，大于负样本到锚点的距离。故随着训练的进行，训练样本可能不满足这样的条件，则需要剔除这一部分数据。越训练，样本越少，所需要的困难样本难以寻找。
+
+故该损失难以训练。
+
+## 6、A-Softmax
+
+$$
+softmax(x_{i})=\frac{e^{x_{i}}}{\sum_{j=1}^{n}e^{x_{j}}}
+$$
+
+网络在最后层(线性分类层)的结果，传入softmax()函数计算的时候，在没有偏置的情况下。
+
+可以写为
+$$
+softmax(\vec{X})=\frac{e^{\vec{X}\cdot \vec{W}}}{\sum_{j=1}^{n}e^{\vec{X_{j}}\cdot \vec{W_{j}}}}
+$$
+而两向量相乘，又可以写为：
+$$
+\vec{X}\cdot \vec{W}=\left | \vec{X} \right |\times \left | \vec{W} \right |\times cos(\theta )
+$$
+则：
+$$
+softmax(x_{i})=\frac{e^{\left |\vec{X}_{i}\right |\cdot \left |\vec{W}_{i}\right |cos(\theta_{i})}}{\sum_{j=1}^{n}e^{\left |\vec{X}_{j}\right |\cdot \left |\vec{W}_{j}\right |cos(\theta_{j})}}
+$$
+
+
+## 7、Arc Face Loss
+
+$$
+Arc\_Face\_Loss = -\frac{1}{N}\sum_{i=1}^{N}log\frac{e^{s\times  cos(\theta_{y_{i}}+m)}}{e^{s\times cos(\theta_{y_{i}}+m)}+\sum_{j=1,j\neq y_{i}}^{n}e^{s\times cos(\theta_{j})}}
+$$
+
+其中**s**为$\vec{X} \cdot \vec{W}$的模
+
+如果对其做二范数归一化之后，则为1。
+
+以上述手写数字识别，输出特征数量为2,。
+
+<img src="image/image-20200823172241821.png" alt="image-20200823172241821" style="zoom:67%;" />
+
+在对网络输入特征和最后一层线性分类层（无偏置）做二范数归一化后，作为二维向量，画于图上，A为某一类别的分类参数向量，B为特征向量。则特征向量与每一个神经元的参数构成的向量，求余弦角。
+
+如果输入的特征向量，与某一类别的参数向量的夹角更小，则余弦值更大，那么softmax之后，则的值更大。
+
+基于此，我们给其和所属的类别的参数向量的$\theta$的角度增加一个m的角度值。
+
+![image-20200823181152742](image/image-20200823181152742.png)
+
+则对于最后一层分类层来讲，它所看到的特征图就不再是可以清晰分开的了，而是会交杂在一起。所以会有动力，要求前面的神经网络，提取到更加清晰可分的特征，如此到最后一层线性分类层所看到的图像，没有增加角度偏置的图像的时候，实际得到的特征图像，已经变成了下图所示样子。基本同一类别
+
+<img src="image/image-20200823183029398.png" alt="image-20200823183029398" style="zoom: 33%;" />
+
+于是按照公式写出代码[C03ArcFaceLoss.ArcFaceLoss](Chapter03/C03ArcFaceLoss.py)：
+
+```python
+class ArcFaceLoss(nn.Module):
+
+    def __init__(self, num_features, num_categories, angle):
+        super(ArcFaceLoss, self).__init__()
+        self.num_features = num_features
+        self.num_categories = num_categories
+        self.angle = angle
+        self.w = nn.Parameter(torch.randn(self.num_features, self.num_categories))
+
+    def forward(self, features, target):
+        target = target.unsqueeze(dim=1)
+        features_modulus = torch.sum(features ** 2, dim=1, keepdim=True) ** 0.5
+        w_modulus = torch.sum(self.w ** 2, dim=0, keepdim=True) ** 0.5
+        modulus = features_modulus * w_modulus
+        cos_theta = torch.matmul(features, self.w) / modulus
+        theta = torch.acos(cos_theta) + self.angle
+        cos_theta_plus = torch.cos(theta)
+        top = torch.exp(modulus * cos_theta_plus).gather(dim=1, index=target)
+        down_ = torch.exp(torch.matmul(features, self.w))
+        down = down_.sum(dim=1, keepdim=True) - down_.gather(dim=1, index=target) + top
+        return -torch.log(top / down).sum() / len(target)
+```
+
+然而只是按照公式所编写的程序，容易出现问题。
+
+![image-20200823184656621](image/image-20200823184656621.png)
+
+原因出在，计算a$rccos(cos\theta)$的时候，当$cos\theta$为±1的时候，其arccos求导，导数为无穷大，则对于计算机来讲，梯度爆炸，已经无法计算。所以需要进行特殊化处理。[C03ArcFaceLoss.ArcFace](Chapter03/C03ArcFaceLoss.py)
+
+```python
+def forward(self, feature):
+    feature = nn.functional.normalize(feature, dim=1)
+    w = nn.functional.normalize(self.w, dim=0)
+    cos_theta = torch.matmul(feature,w)/self.s
+    theta = torch.acos(cos_theta)
+    _top = torch.exp(self.s*torch.cos(theta))
+    top = torch.exp(self.s*(torch.cos(theta + self.angle)))
+    under = torch.sum(torch.exp(cos_theta*self.s),dim=1,keepdim=True)
+    return (top/(under - _top+top))
+```
+
+如此，公式的分子的计算则变为了：
+$$
+e^{s\times10\times  cos(arccos(\frac{1}{10}\times cos(\theta_{y_{i}}))+m)}
+$$
+为何依然有效呢？
+
+$cos\theta$除以10后，它的值域压缩至了（-0.1,0.1）
+
+则对其求反函数，$arccos(cos\theta)$的值域为（1.671，1.471）
+
+再加上一个角度之后，求cos，再乘以10，时。
+
+此时：$f(\theta)$的图像变化如下。
+
+![image-20200823195413802](image/image-20200823195413802.png)
+
+按照原始公式，$f(\theta)$的图像变化如下
+
+![image-20200823202709751](image/image-20200823202709751.png)
+
+特殊处理之后的，相较于原始公式，图像不再有不可导的点以外，整体趋势是相同的。
+
