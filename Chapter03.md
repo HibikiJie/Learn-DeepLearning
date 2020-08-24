@@ -276,7 +276,32 @@ class ArcFaceLoss(nn.Module):
 
 ![image-20200823184656621](image/image-20200823184656621.png)
 
-原因出在，计算a$rccos(cos\theta)$的时候，当$cos\theta$为±1的时候，其arccos求导，导数为无穷大，则对于计算机来讲，梯度爆炸，已经无法计算。所以需要进行特殊化处理。[C03ArcFaceLoss.ArcFace](Chapter03/C03ArcFaceLoss.py)
+原因出在，计算a$rccos(cos\theta)$的时候，当$cos\theta$为±1的时候，其arccos求导，导数为无穷大，则对于计算机来讲，梯度爆炸，已经无法计算。所以需要进行特殊化处理。
+
+首先想到对a$rccos(cos\theta)$函数进行改写，将其导数为无穷出的值，规定为一个较小的值即可：
+
+```python
+class MyArcCos(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, input):
+        ctx.save_for_backward(input)
+        return torch.acos(input)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, = ctx.saved_tensors
+        grad_input = -(1-input**2)**(-0.5)
+        grad_input[input >= 0.99] = -7.0888
+        grad_input[input <= -0.99] =-7.0888
+        return grad_input*grad_output
+```
+
+然而结果，在训练时依旧会产生梯度爆炸。只是减缓了到来的时间。
+
+另外一种处理方式为：
+
+[C03ArcFaceLoss.ArcFace](Chapter03/C03ArcFaceLoss.py)
 
 ```python
 def forward(self, feature):
@@ -310,5 +335,55 @@ $cos\theta$除以10后，它的值域压缩至了（-0.1,0.1）
 
 ![image-20200823202709751](image/image-20200823202709751.png)
 
-特殊处理之后的，相较于原始公式，图像不再有不可导的点以外，整体趋势是相同的。
+特殊处理之后的，相较于原始公式，图像不再有不可导的点以外，整体趋势是相同的。并且处理之后的图形，更加平滑，完全是将$cos\theta$向下平移的样式。
 
+其训练收敛效果如下所示。
+
+![new](image/new-1598253720254.gif)
+
+### 小记：
+
+发现arcface作处理后的$cos\theta$的图像上看，是往下移动了接近1，于是我试着
+
+```python
+def forward(self, features, target):
+    target = target.unsqueeze(dim=1)
+    features = torch.nn.functional.normalize(features, dim=1)
+    w = torch.nn.functional.normalize(self.w, dim=0)
+    cos_theta = torch.matmul(features, w)
+    cos_theta_plus = cos_theta-1.0
+    top = torch.exp(cos_theta_plus).gather(dim=1, index=target)
+    down_tempy = torch.exp(cos_theta)
+    down = down_tempy.sum(dim=1, keepdim=True) - down_tempy.gather(dim=1, index=target) + top
+    return -torch.log(top / down).sum() / len(target)
+```
+
+也即，公式变化为
+$$
+Loss = -\frac{1}{N}\sum_{i=1}^{N}log\frac{e^{s\times  (cos(\theta_{y_{i}})-1.0)}}{e^{s\times (cos(\theta_{y_{i}})-1.0)}+\sum_{j=1,j\neq y_{i}}^{n}e^{s\times cos(\theta_{j})}}
+$$
+其函数图像为：
+
+<img src="image/image-20200824155714990.png" alt="image-20200824155714990" style="zoom:50%;" />
+
+其图像和Arc Face Loss相似，但收敛效果没有Arc Face Loss好。
+
+<img src="image/image-20200824155851500.png" alt="image-20200824155851500" style="zoom:33%;" />
+
+同时，在上述实验中，在对arc face loss的训练中，损失计算是传入CrossEntropyLoss()中进行的，该函数自带有softmax()函数，也就是说，在对arc face后的结果在进行一次softmax归一化后，的效果会更好。
+
+为什么会更加好呢？
+
+我认为，例如，其中，对一个样本，输出的特征，和该类别的特征参数的余弦夹角为0°，$cos\theta=1$，然后通过惩罚后，$cos(\theta+m)=0$,而与其他的特征参数向量的夹角为180°，即负相关的话，惩罚后的结果为$cos(\theta+m)=-2$，则实际输出的分类结果为：
+
+```python
+tensor([0.2320, 0.0233, 0.0233, 0.0233, 0.0233, 0.0233, 0.0233, 0.0233, 0.0233, 0.0233])
+```
+
+如果再经过softmax函数后，结果为：
+
+```python
+tensor([0.1204, 0.0977, 0.0977, 0.0977, 0.0977, 0.0977, 0.0977, 0.0977, 0.0977, 0.0977])
+```
+
+可以看到，1类所占的概率降低了，则在做交叉熵的时候，会得到较大的损失，则网络更加具有学习更加清晰可分特征的动力。

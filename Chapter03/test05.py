@@ -13,28 +13,26 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.convolution1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1),
-            nn.MaxPool2d(2),
             nn.ReLU(),
             nn.BatchNorm2d(16),
-            nn.Conv2d(16, 32, 3, 1),
+            nn.Conv2d(16,32,3,2),
             nn.ReLU(),
             nn.BatchNorm2d(32),
-            nn.Conv2d(32, 64, 3, 3),
+            nn.Conv2d(32, 64, 3, 1),
             nn.ReLU(),
             nn.BatchNorm2d(64),
-            nn.Conv2d(64, 128, 3, 1,bias=False),
+            nn.Conv2d(64, 128, 3, 3),
             nn.ReLU(),
             nn.BatchNorm2d(128),
+            nn.Conv2d(128, 256, 3, 1),
+            nn.ReLU(),
         )
         self.full_connect1 = nn.Sequential(
-            nn.Linear(128, 2,bias=False),
+            nn.Linear(256, 2,False),
         )
 
     def forward(self, enter):
-        xy = self.full_connect1(self.convolution1(enter).reshape(-1, 128))
-
-        '''将中间层的特征同时返回'''
-        return xy
+        return self.full_connect1(self.convolution1(enter).reshape(-1, 256))
 
 
 def visualize(features, labels, epoch):
@@ -75,7 +73,7 @@ if __name__ == '__main__':
 
     '''实例化模型，优化器，损失函数'''
     net = Net().to(device)
-    loss_function = ArcFaceLoss(2,10,0.5).to(device)
+    loss_function = ArcFaceLoss(2,10,0.05).to(device)
     optimizer = torch.optim.Adam([{'params': net.parameters()}, {'params': loss_function.parameters()}])
     i = 0
 

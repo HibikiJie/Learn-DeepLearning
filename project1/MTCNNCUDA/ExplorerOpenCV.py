@@ -8,6 +8,7 @@ from PIL import Image
 import cv2
 import imageio
 
+
 class Explorer:
 
     def __init__(self, is_cuda=False):
@@ -134,7 +135,7 @@ class Explorer:
         y1 = boxes[:, 1]
         x2 = boxes[:, 2]
         y2 = boxes[:, 3]
-        __h,__w ,c = image.shape
+        __h, __w, c = image.shape
         w = x2 - x1
         h = y2 - y1
         center_x = x1 + w // 2
@@ -143,10 +144,10 @@ class Explorer:
 
         x1 = numpy.maximum(center_x - side_lens * 0.5, 0).astype('int')
         y1 = numpy.maximum(center_y - side_lens * 0.5, 0).astype('int')
-        x2 = numpy.minimum(x1 + side_lens,__w)
-        y2 = numpy.minimum(y1 + side_lens,__h)
+        x2 = numpy.minimum(x1 + side_lens, __w)
+        y2 = numpy.minimum(y1 + side_lens, __h)
 
-        side_lens = numpy.minimum(y2-y1,x2-x1).astype('int')
+        side_lens = numpy.minimum(y2 - y1, x2 - x1).astype('int')
         x2 = x1 + side_lens
         y2 = y1 + side_lens
 
@@ -169,8 +170,8 @@ class Explorer:
 
 
 if __name__ == '__main__':
-    video = 'C:/Users/lieweiai/Pictures/737062022a9aa1679c9d865c43c413e4.mp4'
-    # video = 'http://admin:admin@192.168.42.129:8081/video'
+    # video = 'C:/Users/lieweiai/Pictures/737062022a9aa1679c9d865c43c413e4.mp4'
+    video = 'http://admin:admin@192.168.42.129:8081/video'
     # video = "http://admin:admin@192.168.0.121:8081/video"
     video_capture = cv2.VideoCapture(video)
     explorer = Explorer(True)
@@ -178,23 +179,36 @@ if __name__ == '__main__':
     boxes = None
     a_time = time()
     # out = cv2.VideoWriter('2.avi')
-    frames=[]
+    frames = []
     try:
         while True:
             success, img = video_capture.read()
-            img = cv2.resize(img,None,fx=0.5,fy=0.5)
+            # img = cv2.resize(img, None, fx=0.5, fy=0.5)
             print(img.shape)
-            if success and (i % 2 == 0):
-
+            if success and (i % 5 == 0):
                 image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 boxes = explorer.explore(image)
             for box in boxes:
-                x1 = int(box[0])
-                y1 = int(box[1])
-                x2 = int(box[2])
-                y2 = int(box[3])
+                x1 = box[0]
+                y1 = box[1]
+                x2 = box[2]
+                y2 = box[3]
+                w = x2 - x1
+                h = y2 - y1
+                c_x = x1 + w / 2
+                c_y = y1 + h / 2
+                c_x = int(c_x)
+                c_y = int(c_y)
+                sid_length = int(max(0.4 * w, 0.3 * h))
+                x1 = c_x - sid_length
+                y1 = c_y - sid_length
+                x2 = c_x + sid_length
+                y2 = c_y + sid_length
+                # img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+                image_crop = img[y1:y2,x1:x2]
+                cv2.imwrite(f'D:/data/object2/2/{i}.jpg',image_crop)
                 img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            # img = cv2.resize(img, None, fx=2, fy=2)
             cv2.imshow('JK', img)
             i += 1
             if cv2.waitKey(1) == ord('q'):
@@ -203,7 +217,6 @@ if __name__ == '__main__':
             # frames.append(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)))
         cv2.destroyAllWindows()
 
-    except:pass
-    print('1111',i/(time()-a_time))
-    # imageio.mimsave(gif_name, frames, 'GIF', duration=duration)
-    # imageio.mimsave('aaa.gif', frames, 'GIF', duration=0.05)
+    except:
+        pass
+    print('1111', i / (time() - a_time))

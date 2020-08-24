@@ -1,30 +1,28 @@
 import torch
-from torch.autograd import Variable
-class MyArccos(torch.autograd.Function):
+import numpy
+
+class MyArcCos(torch.autograd.Function):
+
     @staticmethod
-    def forward(ctx, i):
-        ctx.save_for_backward(i)
-        return i.acos()
+    def forward(ctx, input):
+        ctx.save_for_backward(input)
+        return torch.acos(input)
 
     @staticmethod
     def backward(ctx, grad_output):
-        input_, = ctx.saved_tensors
-        print(input_)
-        grad_input = grad_output.clone()
-        print(grad_input.data)
-        print(-0.9999<input_<0.9999)
-        grad_input[-0.9999<input_<0.9999] = -1/((1-grad_input**2)**0.5)
-        grad_input[input_ < -0.9999] = -70.7048
-        grad_input[input_ > 0.9999] = -70.7048
-        print(grad_output,11)
-        print(input_)
-        print(grad_input,22)
-        return grad_input
+        input, = ctx.saved_tensors
+        grad_input = -(1-input**2)**(-0.5)
+        grad_input[input >= 0.866025403784438646] = -2*input[input >= 0.866025403784438646]
+        grad_input[input <= -0.866025403784438646] = 2*input[input <= -0.866025403784438646]
+        return grad_input*grad_output
 
-input_=torch.randn([1],dtype=torch.float32,requires_grad=True)
-print(input_)
-arccos = MyArccos.apply(input_)
-# out = arccos(input_)
-print(arccos)
-arccos.backward()
-print(input_.grad)
+if __name__ == '__main__':
+    line = torch.nn.Sequential(
+        torch.nn.Linear(16,32),
+        torch.nn.ReLU(),
+        torch.nn.Linear(32,64),
+        torch.nn.ReLU(),
+        torch.nn.Linear(64, 2)
+    )
+    x = torch.randn(512,16)
+    y = torch.randn()

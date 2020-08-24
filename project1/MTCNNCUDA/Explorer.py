@@ -162,26 +162,39 @@ class Explorer:
 
 if __name__ == '__main__':
     video = 'C:/Users/lieweiai/Pictures/737062022a9aa1679c9d865c43c413e4.mp4'
-    # video = 'http://admin:admin@192.168.42.129:8081/video'
+    video = 'http://admin:admin@192.168.42.129:8081/video'
     # video = "http://admin:admin@192.168.0.121:8081/video"
+    # video = 'http://ivi.bupt.edu.cn/hls/cctv2hd.m3u8'
     video_capture = cv2.VideoCapture(video)
     explorer = Explorer(True)
     i = 0
     boxes = None
     while True:
         success, img = video_capture.read()
-
-        if success and (i % 2 == 0):
+        # img = cv2.resize(img, None, fx=0.3, fy=0.3)
+        if success and (i % 4 == 0):
             image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             boxes = explorer.explore(image)
         for box in boxes:
-            x1 = int(box[0])
-            y1 = int(box[1])
-            x2 = int(box[2])
-            y2 = int(box[3])
+            x1 = box[0]
+            y1 = box[1]
+            x2 = box[2]
+            y2 = box[3]
+            w = x2-x1
+            h = y2-y1
+            c_x = x1+w//2
+            c_y = y1 + h //2
+            sid_length = max(0.4*w,0.3*h)
+            x1 = c_x - sid_length
+            y1 = c_y - sid_length
+            x2 = c_x + sid_length
+            y2 = c_y + sid_length
+            x1,y1,x2,y2 =  (int(x1), int(y1),int(x2), int(y2))
+            strsss = f'{x1}.{y1}.{x2}.{y2}'
+
             img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        # img = cv2.resize(img, None, fx=2, fy=2)
+            cv2.imwrite(f'D:/data/object2/0/image{i}.{strsss}.jpg', img)
         cv2.imshow('JK', img)
         i += 1
         if cv2.waitKey(1) == ord('q'):
