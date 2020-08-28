@@ -20,7 +20,8 @@
 | :-----: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |    1    | [全连接神经网络](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Chapter01.md) | 了解全连接神经网络的拓扑结构，并知悉常用的激活函数，搭建一个全连接神经网络模型。 |
 |    2    | [卷积神经网络](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Chapter02.md) |          了解卷积运算，构建单目标识别的卷积神经网络          |
-|    3    |                           人脸识别                           |                  center loss和arc face loss                  |
+|    3    |                           人脸识别                           |       分类数不定的网络实现，center loss和arc face loss       |
+|    4    |                             优化                             |                                                              |
 
 
 
@@ -33,7 +34,7 @@
 | Project | Topic                                                        | Description        |
 | ------- | ------------------------------------------------------------ | ------------------ |
 | 1       | [MTCNN](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Project%201.md) | 多任务级联卷积网络 |
-|         |                                                              |                    |
+| 2       | 人脸识别                                                     | 识别人脸           |
 |         |                                                              |                    |
 
 

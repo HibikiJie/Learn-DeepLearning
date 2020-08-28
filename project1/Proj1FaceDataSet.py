@@ -3,7 +3,8 @@ from torchvision.transforms import ToTensor
 from PIL import Image
 from time import time
 import torch
-
+from PIL import Image
+import os
 
 class FaceDataSet(Dataset):
 
@@ -50,13 +51,3 @@ class FaceDataSet(Dataset):
         image_tensor = self.to_tensor(image) - 0.5
         return image_tensor, torch.tensor([confidence], dtype=torch.float32), torch.tensor(coordinate,
                                                                                            dtype=torch.float32)
-
-
-if __name__ == "__main__":
-    face_data_set = FaceDataSet(image_size='24')
-    image, c, coordinate = face_data_set[100]
-    print(face_data_set[100])
-    print(image.max())
-    print(image.shape)
-    print(c.shape)
-    print(coordinate.shape)

@@ -33,6 +33,21 @@ class GUI:
             cors = boxes[:, 0:4]
             draw = ImageDraw.Draw(image)
             for cor in cors:
+                x1 = cor[0]
+                y1 = cor[1]
+                x2 = cor[2]
+                y2 = cor[3]
+                w = x2 - x1
+                h = y2 - y1
+                c_x = x1 + w // 2
+                c_y = y1 + h // 2
+                sid_length = max(0.4 * w, 0.3 * h)
+                x1 = c_x - sid_length
+                y1 = c_y - sid_length
+                x2 = c_x + sid_length
+                y2 = c_y + sid_length
+                x1, y1, x2, y2 = (int(x1), int(y1), int(x2), int(y2))
+                cor = (x1,y1,x2,y2)
                 draw.rectangle(tuple(cor), outline='red', width=2)
             image.show()
 
