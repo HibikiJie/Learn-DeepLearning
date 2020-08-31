@@ -1,31 +1,78 @@
 from project2.zExplorerOpenCV import Explorer
 from project2.P2Net import Net
+from torch.utils.data import Dataset, DataLoader
+import os
 import cv2
 import torch
 import numpy
-from torchvision.models import densenet121
-# video = 'C:/Users/lieweiai/Pictures/737062022a9aa1679c9d865c43c413e4.mp4'
-video = 'http://admin:admin@192.168.42.129:8081/video'
-# video = "http://admin:admin@192.168.0.121:8081/video"
-# video = 'D:/data/object2/qiaoben.mp4'
-video_capture = cv2.VideoCapture(0)
-explorer = Explorer(True)
-boxes = None
-i = 0
-image = None
-net = Net()
-# net = densenet121()
-# net.load_state_dict(torch.load('D:/data/object2/netParam/net233.pth'))
-net = net.eval()
-while True:
-    success, img = video_capture.read()
-    # img = cv2.resize(img, None, fx=0.5, fy=0.5)
-    # print(img.shape)
-    if success:
-        img_h, img_w, c = img.shape
-        if i % 2 == 0:
-            image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            boxes = explorer.explore(image)
+
+
+class FeaturesDataSet(Dataset):
+
+    def __init__(self, root='D:/data/object2/datas'):
+        super(FeaturesDataSet, self).__init__()
+        self.data_set = []
+        self.target = 0
+        self.targets = []
+        for files_name in os.listdir(root):
+            name = files_name
+            for file_name in os.listdir(f'{root}/{files_name}'):
+                path = f'{root}/{files_name}/{file_name}'
+                feature_tensor = torch.load(path)
+                self.data_set.append((self.target, feature_tensor))
+            self.targets.append(name)
+            self.target += 1
+
+    def __len__(self):
+        return len(self.data_set)
+
+    def __getitem__(self, item):
+        target, feature = self.data_set[item]
+        return feature, torch.tensor(target)
+
+
+class IdentifyFace:
+
+    def __init__(self, is_cuda=True):
+        self.is_cuda = is_cuda
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() and is_cuda else "cpu")
+        self.net = Net().to(self.device)
+        self.net.load_state_dict(torch.load('D:/data/object2/netParam/net9.pth'))
+        self.net = self.net.eval()
+        self.explorer = Explorer(self.is_cuda)
+        self.feature_data_set = FeaturesDataSet()
+        self.feature_data_loader = DataLoader(self.feature_data_set, len(self.feature_data_set))
+
+    def get_boxes(self, image_RGB):
+        boxes = self.explorer.explore(image_RGB)
+        return boxes
+
+    def __call__(self, video=0, ):
+        count = 0
+        video_capture = cv2.VideoCapture(video)
+        informations = ()
+        boxes = None
+        while True:
+            success, image = video_capture.read()
+            image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            if count % 2 == 0:
+                boxes = self.get_boxes(image_RGB)
+                boxes = self.adjust_boxes(boxes)
+                if count % 4 == 0:
+                    informations = self.comparison_feature(image_RGB, boxes)
+            for information in informations:
+                name = information[0]
+                x1, y1, x2, y2 = information[1], information[2], information[3], information[4]
+                image = cv2.putText(image, name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            for box in boxes:
+                x1, y1, x2, y2 = box
+                image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.imshow('JK', image)
+            if cv2.waitKey(1) == ord('q'):
+                break
+
+    def adjust_boxes(self, boxes):
+        box_new = []
         for box in boxes:
             x1 = box[0]
             y1 = box[1]
@@ -34,28 +81,40 @@ while True:
             w = x2 - x1
             h = y2 - y1
             c_x = x1 + w / 2 - w * 0.02
-            c_y = y1 + h / 2 + h * 0.025
-            sid_length = max(0.4 * w, 0.3 * h) * 0.95
+            c_y = y1 + h / 2
+                  # + h * 0.01
+            sid_length = max(0.4 * w, 0.3 * h) * 0.8
             c_x, c_y, sid_length = int(c_x), int(c_y), int(sid_length)
             x1 = c_x - sid_length
             y1 = c_y - sid_length
             x2 = c_x + sid_length
             y2 = c_y + sid_length
-            # img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            if i % 8 == 0:
-                if x1 > 0 and x2 < img_w and y1 > 0 and y2 < img_h:
-                    if x2-x1>120:
-                        image_crop = image[y1:y2, x1:x2]
-                        image_crop = cv2.resize(image_crop, (128, 128), interpolation=cv2.INTER_AREA)
-                        image_tensor = torch.from_numpy(
-                            numpy.transpose(image_crop, (2, 0, 1)) / 255 - 0.5).float().unsqueeze(0)
-                        feature = net(image_tensor).squeeze(0)
-                        print(feature.shape)
-                        torch.save(feature,f'D:/data/object2/datas/xiangjie{i}')
+            box_new.append((x1, y1, x2, y2))
+        return box_new
 
-            img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.imshow('JK', img)
-        i += 1
-        if cv2.waitKey(1) == ord('q'):
-            break
-cv2.destroyAllWindows()
+    def comparison_feature(self, image_RGB, boxes):
+        information = []
+        targets = self.feature_data_set.targets
+        img_h, img_w, c = image_RGB.shape
+        for box in boxes:
+            x1, y1, x2, y2 = box
+            if x1 > 0 and x2 < img_w and y1 > 0 and y2 < img_h and x2 - x1 >= 60:
+                image_crop = image_RGB[y1:y2, x1:x2]
+                image_crop = cv2.resize(image_crop, (112, 112), interpolation=cv2.INTER_AREA)
+                image_tensor = torch.from_numpy(
+                    numpy.transpose(image_crop, (2, 0, 1)) / 255 - 0.5).float().unsqueeze(0).to(self.device)
+                feature = self.net(image_tensor).cpu()
+                for features, target in self.feature_data_loader:
+                    cos_thetas = torch.cosine_similarity(feature,features,dim=1)
+                    print(cos_thetas)
+                    max_index = torch.argmax(cos_thetas)
+                    cos_theta = cos_thetas[max_index]
+                    if cos_theta >= 0.85:
+                        name = targets[target[max_index.item()]]
+                        information.append((name, x1, y1, x2, y2))
+        return information
+
+
+if __name__ == '__main__':
+    indetify_face = IdentifyFace(True)
+    indetify_face()

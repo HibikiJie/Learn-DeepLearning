@@ -1,5 +1,5 @@
 import cv2
-from project1.MTCNNCUDA.Explorer import Explorer
+from project2.zExplorerOpenCV import Explorer
 import os
 from PIL import Image
 
@@ -47,6 +47,8 @@ def video_catch():
 
 
 def image_catch(image_files_path,save_path):
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     image_files_path = image_files_path
     explorer = Explorer(True)
     i = 0
@@ -62,11 +64,10 @@ def image_catch(image_files_path,save_path):
             y2 = box[3]
             w = x2 - x1
             h = y2 - y1
-            c_x = x1 + w / 2
-            c_y = y1 + h / 2
-            c_x = int(c_x)
-            c_y = int(c_y)
-            sid_length = int(max(0.4 * w, 0.3 * h))
+            c_x = x1 + w / 2 - w * 0.02
+            c_y = y1 + h / 2 + h * 0.025
+            sid_length = max(0.4 * w, 0.3 * h) * 0.95
+            c_x, c_y, sid_length = int(c_x), int(c_y), int(sid_length)
             x1 = c_x - sid_length
             y1 = c_y - sid_length
             x2 = c_x + sid_length
@@ -87,13 +88,16 @@ if __name__ == '__main__':
     #             image = image.resize((128, 128), Image.ANTIALIAS)
     #             image.save(f'D:/data/object2/data/{i}/{j}.jpg')
     #             j += 1
-
-    for i in (9,10):
-        j = 0
-        for file in os.listdir(f'D:/data/object2/object2/{i}'):
-            image = Image.open(f'D:/data/object2/object2/{i}/{file}')
-            w, h = image.size
-            if w > 100 and h > 100:
-                image = image.resize((112, 112), Image.ANTIALIAS)
-                image.save(f'D:/data/object2/temp/{i}/{j}.jpg')
-                j += 1
+    c = 0
+    for dirs in os.listdir('D:/data/object2/casia_v5/all'):
+        image_catch(f'D:/data/object2/casia_v5/all/{dirs}',f'D:/data/object2/casia_v5/sqr/{c}')
+        c+=1
+    # for i in (9,10):
+    #     j = 0
+    #     for file in os.listdir(f'D:/data/object2/object2/{i}'):
+    #         image = Image.open(f'D:/data/object2/object2/{i}/{file}')
+    #         w, h = image.size
+    #         if w > 100 and h > 100:
+    #             image = image.resize((112, 112), Image.ANTIALIAS)
+    #             image.save(f'D:/data/object2/temp/{i}/{j}.jpg')
+    #             j += 1

@@ -36,7 +36,6 @@ class Explorer:
         self.o_net.load_parameters()
 
     def explore(self, image):
-        start_time = time()
         boxes_p = self.p_net_explore(image)
         if not boxes_p.size > 0:
             return numpy.array([])
@@ -44,7 +43,6 @@ class Explorer:
         if not boxes_r.size > 0:
             return numpy.array([])
         boxes_o = self.o_net_explore(image, boxes_r)
-        print(time() - start_time)
         return boxes_o
 
     def p_net_explore(self, image):

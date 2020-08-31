@@ -8,7 +8,7 @@ import os
 
 class FCDataSet(Dataset):
 
-    def __init__(self, root='D:/data/object2/data'):
+    def __init__(self, root='D:/data/object2/casiafaceV5'):
         super(FCDataSet, self).__init__()
         self.data_set = []
         self.to_tensor = ToTensor()

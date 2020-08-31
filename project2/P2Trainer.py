@@ -14,10 +14,10 @@ class Train:
         self.data_set = FCDataSet()
         self.data_loader = DataLoader(self.data_set, 64, True)
         self.net = Net().train().to(self.devise).train()
-        self.arc_face = ArcFace(1000, 13).to(self.devise)
+        self.arc_face = ArcFace(1000, 505).to(self.devise)
         self.optimzer = torch.optim.Adam([{'params': self.net.parameters()}, {'params': self.arc_face.parameters()}])
         self.loss_function = torch.nn.CrossEntropyLoss().to(self.devise)
-        self.summary_writer = SummaryWriter('D:/data/object2/logs')
+        # self.summary_writer = SummaryWriter('D:/data/object2/logs')
 
     def train(self):
         print('开始训练')
@@ -44,6 +44,6 @@ class Train:
             targets = torch.cat(targets, dim=0).unsqueeze(dim=1)
             loss_sum = (loss_sum-60)*1000
             cos_thetas = cos_thetas.gather(dim=1, index=targets)*10
-            print(f'{epoch} : loss_sum:{loss_sum};cos_theta:{cos_thetas.max()},{cos_thetas.min()}')
-            self.summary_writer.add_scalar('Loss',loss_sum,epoch)
+            print(f'{epoch} : loss_sum:{loss_sum};cos_theta:{cos_thetas.mean()},{cos_thetas.min()},{cos_thetas.max()}')
+            # self.summary_writer.add_scalar('Loss',loss_sum,epoch)
             torch.save(self.net.state_dict(), f'D:/data/object2/netParam/net{epoch}.pth')
