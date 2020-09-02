@@ -1,6 +1,3 @@
-import numpy
-import torch
-a = torch.rand(40,1)
-c = torch.argmax(a)
-print(a)
-print(c)
+from project2.P2Net import Net
+from torchvision.transforms import ToTensor
+

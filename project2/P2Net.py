@@ -8,7 +8,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.net = densenet121(True)
-        self.net.classifier = nn.Linear(1024, 1000,False)
+        self.net.classifier = nn.Linear(1024, 512, False)
 
     def forward(self, input_):
         return self.net(input_)
@@ -33,3 +33,10 @@ class ArcFace(nn.Module):
         top = torch.exp(self.s * (torch.cos(theta + self.angle)))
         under = torch.sum(torch.exp(cos_theta * self.s), dim=1, keepdim=True)
         return top / (under - _top + top), cos_theta.detach().cpu()
+
+
+if __name__ == '__main__':
+    net = nn.Conv2d(6,6,3,1,groups=2)
+    x = torch.rand(1,6,6,6)
+    print(x)
+    print(net(x))

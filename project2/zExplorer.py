@@ -38,7 +38,8 @@ class Explorer:
 
     def explore(self, image_numpy):
         start_time = time()
-        image = Image.fromarray(image_numpy)
+        # image = Image.fromarray(image_numpy)
+        image = image_numpy
         boxes_p = self.p_net_explore(image)
         print('P:', time() - start_time)
         # return boxes_p
@@ -59,7 +60,7 @@ class Explorer:
         min_side_len = min(w, h)
         scale = 1
         zoom_ratio = 1
-        while min_side_len > 12:
+        while min_side_len > 48:
             image_tensor = self.to_tensor(image).unsqueeze(0) - 0.5
             image_tensor = image_tensor.to(self.device)
             confidence, position = self.p_net(image_tensor)

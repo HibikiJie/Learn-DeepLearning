@@ -17,9 +17,9 @@ n = 0
 image = None
 net = Net()
 # net = densenet121()
-net.load_state_dict(torch.load('D:/data/object2/netParam/net9.pth'))
+net.load_state_dict(torch.load('D:/data/object2/netParam/net90.pth'))
 net = net.eval()
-name = 'XJ'
+name = 'LL'
 while True:
     success, img = video_capture.read()
     # img = cv2.resize(img, None, fx=0.5, fy=0.5)
@@ -38,7 +38,7 @@ while True:
             h = y2 - y1
             c_x = x1 + w / 2 - w * 0.02
             c_y = y1 + h / 2
-            sid_length = max(0.4 * w, 0.3 * h) * 0.8
+            sid_length = 0.4 * w
             c_x, c_y, sid_length = int(c_x), int(c_y), int(sid_length)
             x1 = c_x - sid_length
             y1 = c_y - sid_length
@@ -51,7 +51,7 @@ while True:
                         image_crop = image[y1:y2, x1:x2]
                         image_crop = cv2.resize(image_crop, (112, 112), interpolation=cv2.INTER_AREA)
                         image_tensor = torch.from_numpy(
-                            numpy.transpose(image_crop, (2, 0, 1)) / 255 - 0.5).float().unsqueeze(0)
+                            numpy.transpose(image_crop, (2, 0, 1)) / 255).float().unsqueeze(0)
                         feature = net(image_tensor).squeeze(0)
                         if not os.path.exists(f'D:/data/object2/datas/{name}'):
                             os.makedirs(f'D:/data/object2/datas/{name}')

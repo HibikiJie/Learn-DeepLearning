@@ -174,7 +174,7 @@ if __name__ == '__main__':
     # video = 'http://admin:admin@192.168.42.129:8081/video'
     # video = "http://admin:admin@192.168.0.121:8081/video"
     video = 'D:/data/object2/qiaoben.mp4'
-    video_capture = cv2.VideoCapture("http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8")
+    video_capture = cv2.VideoCapture(0)
     explorer = Explorer(True)
     i = 0
     boxes = None
@@ -184,9 +184,9 @@ if __name__ == '__main__':
     n = 608
     while True:
         success, img = video_capture.read()
-        img = cv2.resize(img, None, fx=0.4, fy=0.4)
+        # img = cv2.resize(img, None, fx=0.4, fy=0.4)
         # print(img.shape)
-        if success and (i % 4 == 0):
+        if success and (i % 2 == 0):
             image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             boxes = explorer.explore(image)
             # print(image.shape)
@@ -217,11 +217,12 @@ if __name__ == '__main__':
             y1 = box[1]
             x2 = box[2]
             y2 = box[3]
+            # x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
             w = x2 - x1
             h = y2 - y1
             c_x = x1 + w / 2 - w * 0.02
-            c_y = y1 + h / 2 + h * 0.025
-            sid_length = max(0.4 * w, 0.3 * h) * 0.95
+            c_y = y1 + h / 2
+            sid_length = max(0.4 * w, 0.3 * h) * 0.82
             c_x, c_y, sid_length = int(c_x), int(c_y), int(sid_length)
             x1 = c_x - sid_length
             y1 = c_y - sid_length
