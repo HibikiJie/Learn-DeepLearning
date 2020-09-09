@@ -222,7 +222,33 @@ class Net(nn.Module):
         '''......'''
 ```
 
+### 4.3 查看权重分布
 
+```python
+summary_writer = SummaryWriter('D:/data/chapter4/logs')
+layer1 = net.conv1[0].weight
+summary_writer.add_histogram('layer1',layer1)
+```
+
+则查看初始化权重：
+
+![image-20200904142159055](image/image-20200904142159055.png)
+
+也可以给步长，在训练中，查看权重的变化情况
+
+```python
+summary_writer.add_histogram('layer1',layer1,global_step=epoch)
+```
+
+![image-20200904143419243](image/image-20200904143419243.png)
+
+此外还可以查看训练的数据情况：
+
+```python
+summary_writer.add_images('image',image)
+```
+
+<img src="image/image-20200904143814496.png" alt="image-20200904143814496" style="zoom:50%;" />
 
 
 
@@ -306,4 +332,8 @@ class ResBlock(nn.Module):
 $$
 x_{l}=H_{l}([x_{0},x_{1},...,x_{l-1}])
 $$
+$[x_{0},x_{1},...,x_{l-1}]$表示将0到l-1层的输出feature map做**concatenation**，也称路由。
+
 0到l-1层的输出特征图（feature map）做通道合并（concatenation）
+
+![image-20200907162021960](image/image-20200907162021960.png)

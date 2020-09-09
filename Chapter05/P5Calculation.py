@@ -39,16 +39,13 @@ class NetV4(nn.Module):
         return self.conv1(input_)
 
 
-# conv1 = nn.Conv2d(6,30,3,1)
-# conv2 = nn.Conv2d(6,30,3,1,groups=2)
-# conv3 = nn.Conv2d(6,30,3,1,groups=3)
-# conv4 = nn.Conv2d(6,30,3,1,groups=6)
 net1 = NetV1()
 net2 = NetV2()
 net3 = NetV3()
 net4 = NetV4()
 x = torch.randn(1, 6, 112, 112)
-print(thop.clever_format(thop.profile(net1, (x,))))
+print(thop.clever_format(thop.profile(model=net1, inputs=(x,))))
 print(thop.clever_format(thop.profile(net2, (x,))))
 print(thop.clever_format(thop.profile(net3, (x,))))
 print(thop.clever_format(thop.profile(net4, (x,))))
+

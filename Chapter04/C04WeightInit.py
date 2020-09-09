@@ -44,10 +44,10 @@ if __name__ == '__main__':
     print(net.conv1[1].bias)
     # print(net.conv1[0].weight.mean())
     # print(net.conv1[0].weight.var()**2)
-    # summary_writer = SummaryWriter('D:/data/chapter4/logs')
-    # layer1 = net.conv1[0].weight
-    #
-    #
-    # summary_writer.add_histogram('layer1',layer1)
+    summary_writer = SummaryWriter('D:/data/chapter4/logs')
+    layer1 = net.conv1[0].weight
+    # summary_writer.add_images('image',image)
+
+    summary_writer.add_histogram('layer1',layer1)
     # while True:
     #     print(1)

@@ -107,6 +107,10 @@ $$
 
 ![img](D:\Learn-DeepLearning\image\u=800186656,2093919147&fm=15&gp=0.jpg)
 
+#### 6）Relu6
+
+![image-20200904151927841](image/image-20200904151927841.png)
+
 
 
 ### 3、深度神经网络与深度学习

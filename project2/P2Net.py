@@ -8,7 +8,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.net = densenet121(True)
-        self.net.classifier = nn.Linear(1024, 512, False)
+        self.net.classifier = nn.Linear(1024, 1000, False)
 
     def forward(self, input_):
         return self.net(input_)

@@ -8,7 +8,7 @@ import os
 
 class FCDataSet(Dataset):
 
-    def __init__(self, root='D:/data/object2/faceimage'):
+    def __init__(self, root='D:/data/object2/dataset'):
         super(FCDataSet, self).__init__()
         self.data_set = []
         self.to_tensor = ToTensor()
@@ -24,7 +24,13 @@ class FCDataSet(Dataset):
     def __getitem__(self, item):
         image_path, target = self.data_set[item]
         image = Image.open(image_path)
+        image = image.convert('RGB')
         image = image.resize((112,112),Image.ANTIALIAS)
         image_tensor = self.to_tensor(image)
         target = torch.tensor(int(target))
         return image_tensor, target
+
+
+if __name__ == '__main__':
+    data = FCDataSet()
+    print(len(data))

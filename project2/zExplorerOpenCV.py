@@ -15,9 +15,9 @@ class Explorer:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() and is_cuda else "cpu")
         print(self.device)
         '''设置网络参数'''
-        self.p_confidence_threshold = 0.9  # 建议值0.6
+        self.p_confidence_threshold = 0.8  # 建议值0.6
         self.p_nms_threshold = 0.4  # 建议值0.6
-        self.r_confidence_threshold = 0.99  # 建议值0.6
+        self.r_confidence_threshold = 0.9  # 建议值0.6
         self.r_nms_threshold = 0.3  # 建议值0.5
         self.o_confidence_threshold = 0.9999  # 建议值0.9999
         self.o_nms_threshold = 0.3  # 建议值0.7
@@ -52,7 +52,15 @@ class Explorer:
         h, w, c = image.shape
         min_side_len = min(w, h)
         zoom_ratio = 1
-        while min_side_len > 12:
+
+        zoom_ratio *= 0.20
+        _w = int(w * zoom_ratio)
+        _h = int(h * zoom_ratio)
+        image = cv2.resize(image, (_w, _h))
+        min_side_len = min(_h, _w)
+
+        while min_side_len >= 12:
+            # print(image.shape)
             image_tensor = self.to_tensor(image).unsqueeze(0)
 
             image_tensor = image_tensor.to(self.device)
@@ -85,7 +93,7 @@ class Explorer:
             confidences.append(confidence)
 
             '''变换图形尺寸'''
-            zoom_ratio *= 0.7
+            zoom_ratio *= 0.707
             _w = int(w * zoom_ratio)
             _h = int(h * zoom_ratio)
             image = cv2.resize(image, (_w, _h))

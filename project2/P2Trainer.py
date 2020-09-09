@@ -12,21 +12,26 @@ class Train:
         self.devise = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         print('准备启用%s设备训练' % self.devise)
         self.data_set = FCDataSet()
-        self.data_loader = DataLoader(self.data_set, 85, True)
+        self.data_loader = DataLoader(self.data_set, 70, True, num_workers=2)
         self.net = Net()
-        # self.net.load_state_dict(torch.load('D:/data/object2/netParam/net8.pth'))
-        self.net = self.net.to(self.devise)
-        self.arc_face = ArcFace(512, 511).to(self.devise)
+        self.net.load_state_dict(torch.load('D:/data/object2/netParam/net8.pth'))
+        self.net = self.net.to(self.devise).train()
+        self.arc_face = ArcFace(1000, 10000)
+        self.arc_face.load_state_dict(torch.load('D:/data/object2/netParam/Arc8.pth'))
+        self.arc_face = self.arc_face.to(self.devise)
         self.optimzer = torch.optim.Adam([{'params': self.net.parameters()}, {'params': self.arc_face.parameters()}])
         self.loss_function = torch.nn.CrossEntropyLoss().to(self.devise)
-        # self.summary_writer = SummaryWriter('D:/data/object2/logs')
+        self.summary_writer = SummaryWriter('D:/data/object2/logs')
 
     def train(self):
         print('开始训练')
+        n = 0
         for epoch in range(10000000):
-            cos_thetas = []
-            targets = []
             loss_sum = 0
+            cos_theta_mean = 0
+            cos_theta_min = 1
+            cos_theta_max = 0
+            i = 1
             for image, target in self.data_loader:
                 image = image.to(self.devise)
                 target = target.to(self.devise)
@@ -38,14 +43,31 @@ class Train:
                 self.optimzer.zero_grad()
                 loss.backward()
                 self.optimzer.step()
-                loss_sum += loss.detach().item()
 
-                cos_thetas.append(cos_theta)
-                targets.append(target.detach().cpu())
-            cos_thetas = torch.cat(cos_thetas, dim=0)
-            targets = torch.cat(targets, dim=0).unsqueeze(dim=1)
-            loss_sum = (loss_sum-60)*1000
-            cos_thetas = cos_thetas.gather(dim=1, index=targets)*10
-            print(f'{epoch} : loss_sum:{loss_sum};cos_theta:{cos_thetas.mean()},{cos_thetas.min()},{cos_thetas.max()}')
-            # self.summary_writer.add_scalar('Loss',loss_sum,epoch)
+                loss_sum += loss.detach().item()
+                index = target.detach().cpu().unsqueeze(1)
+                cos_thetas = cos_theta.gather(dim=1, index=index) * 10
+                mean = cos_thetas.mean().item()
+                cos_theta_mean += mean
+                cos_theta_min = cos_thetas.min().item()
+                cos_theta_max = max(cos_theta_max, cos_thetas.max().item())
+                a = loss_sum / i
+                i += 1
+                print(f'{epoch} : loss_sum:{a};cos_theta:{mean}, {cos_theta_min}, {cos_theta_max}')
+                self.summary_writer.add_scalar('Loss', a, n)
+                self.summary_writer.add_scalar('mean', mean, n)
+                self.summary_writer.add_scalar('min', cos_theta_min, n)
+                self.summary_writer.add_scalar('max', cos_theta_max, n)
+                n += 1
+                if i % 1000 == 0:
+                    torch.save(self.net.state_dict(), f'D:/data/object2/netParam/net{epoch}.pth')
+                    torch.save(self.arc_face.state_dict(), f'D:/data/object2/netParam/Arc{epoch}.pth')
+            cos_theta_mean = cos_theta_mean / len(self.data_loader)
+            print(f'{epoch} : loss_sum:{loss_sum};cos_theta:{cos_theta_mean}, {cos_theta_min}, {cos_theta_max}')
             torch.save(self.net.state_dict(), f'D:/data/object2/netParam/net{epoch}.pth')
+            torch.save(self.arc_face.state_dict(), f'D:/data/object2/netParam/Arc{epoch}.pth')
+
+
+if __name__ == '__main__':
+    train = Train()
+    train.train()
