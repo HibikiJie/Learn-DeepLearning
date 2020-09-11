@@ -1,6 +1,6 @@
 from torch import nn
 import torch
-
+import thop
 
 class ConvolutionLayer(nn.Module):
     """
@@ -253,9 +253,12 @@ class YOLOVision3Net(nn.Module):
 
 if __name__ == '__main__':
     yolo3 = YOLOVision3Net(45)
+    torch.save(yolo3.state_dict(),'yolo.pth')
     print(yolo3)
     x = torch.randn(1, 3, 416, 416)
-    y1, y2, y3 = yolo3(x)
-    print(y1.shape)
-    print(y2.shape)
-    print(y3.shape)
+    a = thop.profile(yolo3,(x,))
+    print(thop.clever_format(a))
+    # y1, y2, y3 = yolo3(x)
+    # print(y1.shape)
+    # print(y2.shape)
+    # print(y3.shape)

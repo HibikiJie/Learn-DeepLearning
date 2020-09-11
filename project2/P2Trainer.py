@@ -1,4 +1,4 @@
-from project2.P2DataSet import FCDataSet
+from project2.P2DataSet import FCDataSet2
 from project2.P2Net import Net, ArcFace
 from torch.utils.data import DataLoader
 import torch
@@ -11,17 +11,18 @@ class Train:
     def __init__(self, is_cuda=True):
         self.devise = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         print('准备启用%s设备训练' % self.devise)
-        self.data_set = FCDataSet()
-        self.data_loader = DataLoader(self.data_set, 70, True, num_workers=2)
+        self.data_set = FCDataSet2()
+        self.data_loader = DataLoader(self.data_set, 75, True)
         self.net = Net()
-        self.net.load_state_dict(torch.load('D:/data/object2/netParam/net8.pth'))
+        self.net.load_state_dict(torch.load('D:/data/object2/netParam/net19.pth'))
         self.net = self.net.to(self.devise).train()
         self.arc_face = ArcFace(1000, 10000)
-        self.arc_face.load_state_dict(torch.load('D:/data/object2/netParam/Arc8.pth'))
+        self.arc_face.load_state_dict(torch.load('D:/data/object2/netParam/Arc19.pth'))
         self.arc_face = self.arc_face.to(self.devise)
         self.optimzer = torch.optim.Adam([{'params': self.net.parameters()}, {'params': self.arc_face.parameters()}])
         self.loss_function = torch.nn.CrossEntropyLoss().to(self.devise)
         self.summary_writer = SummaryWriter('D:/data/object2/logs')
+        print(len(self.data_loader))
 
     def train(self):
         print('开始训练')

@@ -10,11 +10,11 @@ idx_path = path_prefix + ".idx"
 print(rec_path)
 save_path = 'D:/data/object2/dataset'
 train_iter = mx.image.ImageIter(
-    batch_size=1,
+    batch_size=75,
     data_shape=(3, 112, 112),
     path_imgrec=rec_path,
     path_imgidx=idx_path,
-    shuffle=False,)
+    shuffle=False)
 
 train_iter.reset()
 i = 0

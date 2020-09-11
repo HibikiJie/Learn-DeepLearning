@@ -1,6 +1,6 @@
 import os
 
-path = 'D:/data/object2/CASIAWebFaceData'
+path = 'D:/data/object2/dataset'
 
 
 def finde_dir(path):
