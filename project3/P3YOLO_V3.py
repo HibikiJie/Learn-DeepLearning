@@ -129,9 +129,9 @@ class YOLOVision3Net(nn.Module):
 
     参数：
         out_channels：输出通道数。此数字为(4+1+c)*k；
-        k为有多少的检测框，c为检测的类别数，4为边框回归（中心点，长宽），1为是否有目标的置信度。
+        k为一个尺度有多少的检测框，c为检测的类别数，4为边框回归（中心点，长宽），1为是否有目标的置信度。
     """
-    def __init__(self, out_channels):
+    def __init__(self, out_channels=84):
         super(YOLOVision3Net, self).__init__()
         self.out_channels = out_channels
 
