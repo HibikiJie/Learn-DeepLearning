@@ -27,7 +27,7 @@
 |    3    |                           人脸识别                           | 分类数不定的网络实现，孪生网络、Triplet Loss、center loss和arc face loss |
 |    4    |                           模型设计                           | 损失函数、Dropout、正则化、权重初始化、BatchNormal、残差网络、稠密连接网络 |
 |    5    |                           高效模型                           |                通道优化、高效模型块、高效模型                |
-|         |                                                              |                                                              |
+|    6    |                             RNN                              |                  RNN、LSTM、GRU、识别验证码                  |
 |         |                                                              |                                                              |
 
 

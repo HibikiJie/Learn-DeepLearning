@@ -14,7 +14,7 @@ class ConvolutionLayer(nn.Module):
         padding：填充像素的多少
         bias：是否添加偏移
     """
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=False,groups=1):
         super(ConvolutionLayer, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -22,6 +22,7 @@ class ConvolutionLayer(nn.Module):
         self.stride = stride
         self.padding = padding
         self.bias = bias
+        self.groups = groups
         self.convolution = nn.Sequential(
             nn.Conv2d(
                 in_channels=self.in_channels,
@@ -29,7 +30,8 @@ class ConvolutionLayer(nn.Module):
                 kernel_size=self.kernel_size,
                 stride=self.stride,
                 padding=self.padding,
-                bias=self.bias
+                bias=self.bias,
+                groups=self.groups
             ),
             nn.BatchNorm2d(self.out_channels),
             nn.LeakyReLU(0.1)
@@ -78,7 +80,8 @@ class ResidualBlock(nn.Module):
                 self.mid_channels,
                 self.in_channels,
                 kernel_size=3,
-                padding=1
+                padding=1,
+                groups=self.mid_channels
             )
         )
 
@@ -101,9 +104,9 @@ class ConvolutionSet(nn.Module):
         self.out_channels = out_channels
         self.con_set = nn.Sequential(
             ConvolutionLayer(in_channels, out_channels, 1),
-            ConvolutionLayer(out_channels, in_channels, 3, padding=1),
+            ConvolutionLayer(out_channels, in_channels, 3, padding=1, groups=self.out_channels),
             ConvolutionLayer(in_channels, out_channels, 1),
-            ConvolutionLayer(out_channels, in_channels, 3, padding=1),
+            ConvolutionLayer(out_channels, in_channels, 3, padding=1,groups=self.out_channels),
             ConvolutionLayer(in_channels, out_channels, 1)
         )
 
@@ -184,8 +187,8 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，大尺度目标的输出网络层'''
         self.predict1 = nn.Sequential(
-            ConvolutionLayer(512, 1024, 3, padding=1),
-            ConvolutionLayer(1024, self.out_channels, 1)
+            ConvolutionLayer(512, 1024, 3, padding=1,groups=512),
+            nn.Conv2d(1024,self.out_channels,1,1,0)
         )
 
         '''实例化，13x13变换至26x26的上采样，网络层'''
@@ -199,8 +202,8 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，中尺度目标的输出网络层'''
         self.predict2 = nn.Sequential(
-            ConvolutionLayer(256, 512, 3, padding=1),
-            ConvolutionLayer(512, self.out_channels, 1)
+            ConvolutionLayer(256, 512, 3, padding=1,groups=256),
+            nn.Conv2d(512,self.out_channels,1)
         )
 
         '''实例化，26x26变换至52x52的上采样，网络层'''
@@ -214,8 +217,8 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，小尺度目标的输出网络层'''
         self.predict3 = nn.Sequential(
-            ConvolutionLayer(128, 256, 3, padding=1),
-            ConvolutionLayer(256, self.out_channels, 1)
+            ConvolutionLayer(128, 256, 3, padding=1,groups=128),
+            nn.Conv2d(256,self.out_channels,1)
         )
 
     def forward(self, input_):
@@ -248,7 +251,7 @@ class YOLOVision3Net(nn.Module):
         '''侦测52x52的特征图，并通过输出层输出结果'''
         con_set_52 = self.con_set52x52(concatenated52x52)
         predict3 = self.predict3(con_set_52)
-        return predict1, predict2, predict3
+        return predict1.permute(0, 2, 3, 1).reshape(-1, 13, 13, 3, self.out_channels//3), predict2.permute(0, 2, 3, 1).reshape(-1, 26, 26, 3, self.out_channels//3), predict3.permute(0, 2, 3, 1).reshape(-1, 52, 52, 3, self.out_channels//3)
 
 
 if __name__ == '__main__':
@@ -256,9 +259,9 @@ if __name__ == '__main__':
     torch.save(yolo3.state_dict(),'yolo.pth')
     print(yolo3)
     x = torch.randn(1, 3, 416, 416)
-    a = thop.profile(yolo3,(x,))
-    print(thop.clever_format(a))
-    # y1, y2, y3 = yolo3(x)
-    # print(y1.shape)
-    # print(y2.shape)
-    # print(y3.shape)
+    # a = thop.profile(yolo3,(x,))
+    # print(thop.clever_format(a))
+    y1, y2, y3 = yolo3(x)
+    print(y1.shape)
+    print(y2.shape)
+    print(y3.shape)

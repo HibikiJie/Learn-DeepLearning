@@ -11,10 +11,11 @@ class Trainer:
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('准备使用设备%s训练网络' % self.device)
         self.net = Net().train()
+        self.net.load_state_dict(torch.load('D:/data/object3/netparm/net.pth'))
         self.net = self.net.to(self.device)
         print('模型初始化完成')
         self.data_set = Voc2012DataSet()
-        self.data_loader = DataLoader(self.data_set, 3, True, num_workers=4)
+        self.data_loader = DataLoader(self.data_set, 5, True, num_workers=4)
         self.binary_cross_entropy = torch.nn.BCELoss().to(self.device)
         self.mse_loss = torch.nn.MSELoss().to(self.device)
         self.ce_loss = torch.nn.CrossEntropyLoss().to(self.device)
@@ -29,13 +30,12 @@ class Trainer:
         epoch = 0
         while True:
             loss_sum = 0
-            for images, targets_13, targets_26, targets_52 in tqdm(self.data_loader):
+            for images, targets_13, targets_26, targets_52 in self.data_loader:
 
                 images = images.to(self.device)
                 targets_13 = targets_13.to(self.device)
                 targets_26 = targets_26.to(self.device)
                 targets_52 = targets_52.to(self.device)
-
                 predict1, predict2, predict3 = self.net(images)
                 loss1 = self.compute_loss(predict1, targets_13)
                 loss2 = self.compute_loss(predict2, targets_26)
@@ -49,40 +49,45 @@ class Trainer:
                 self.summary_writer.add_scalar('loss', loss.item(), i)
                 i += 1
                 loss_sum += loss.item()
-                if i % 1000 == 0:
-                    torch.save(self.net.state_dict(), f'D:/data/object3/netparm/net{epoch}.pth')
+                if i % 100 == 0:
+                    torch.save(self.net.state_dict(), f'D:/data/object3/netparm/net.pth')
+                # print(i,loss.item())
             epoch += 1
             self.summary_writer.add_scalar('loss_epoch', loss_sum / len(self.data_loader), epoch)
+            print(epoch, loss_sum / len(self.data_loader))
 
     def compute_loss(self, predict, target):
 
         """标签形状为（N,H,W,3,6）"""
-        n, c, h, w = predict.shape
-        predict.permute(0, 2, 3, 1)
-        predict = predict.reshape(n, h, w, 3, -1)
         mask_positive = target[:, :, :, :, 0] > 0.5
         mask_negative = target[:, :, :, :, 0] < 0.5
 
         target_positive = target[mask_positive]
         target_negative = target[mask_negative]
         number, _ = target_positive.shape
-        if number == 0:
-            return 0
         predict_positive = predict[mask_positive]
         predict_negative = predict[mask_negative]
 
         '''置信度损失'''
-        loss_c_p = self.binary_cross_entropy(self.sigmoid(predict_positive[:, 0]), target_positive[:, 0])
+        if number>0:
+            loss_c_p = self.binary_cross_entropy(self.sigmoid(predict_positive[:, 0]), target_positive[:, 0])
+        else:
+            loss_c_p = 0
         loss_c_n = self.binary_cross_entropy(self.sigmoid(predict_negative[:, 0]), target_negative[:, 0])
-        loss_c = 0.001 * loss_c_n + 0.999 * loss_c_p
+        loss_c = 0.1 * loss_c_n + 0.9 * loss_c_p
 
         '''边框回归'''
-        loss_box = self.mse_loss(predict_positive[:, 1:5], target_positive[:, 1:5])
+        if number>0:
+            loss_box1 = self.mse_loss(self.sigmoid(predict_positive[:,1:3]),target_positive[:,1:3])
+            loss_box2 = self.mse_loss(predict_positive[:, 3:5], target_positive[:, 3:5])
 
-        '''分类损失'''
-        loss_class = self.ce_loss(predict_positive[:, 5:], target_positive[:, 5].long())
-
-        return 0.3 * loss_c + 0.4 * loss_box + 0.3 * loss_class
+            '''分类损失'''
+            loss_class = self.ce_loss(predict_positive[:, 5:], target_positive[:, 5].long())
+        else:
+            loss_box1=0
+            loss_box2=0
+            loss_class=0
+        return loss_c + (loss_box1+loss_box2) + loss_class
 
 
 if __name__ == '__main__':

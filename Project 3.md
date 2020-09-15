@@ -72,7 +72,7 @@ YOLO类似于fast rcnn解构，通过一个主网络，53层的暗黑网络（Da
 
 ### （1）目标边界框的预测
 
-YOLOv3网络在三个特征图中分别通过(4+1+c)![\times](https://private.codecogs.com/gif.latex?%5Ctimes) k个大小为1![\times](https://private.codecogs.com/gif.latex?%5Ctimes)1的卷积核进行卷积预测，k为预设边界框（bounding box prior）的个数（k默认取3），c为预测目标的类别数，其中4k个参数负责预测目标边界框的偏移量，k个参数负责预测目标边界框内包含目标的概率，ck个参数负责预测这k个预设边界框对应c个目标类别的概率。
+YOLOv3网络在三个特征图中分别通过(4+1+c)xk个大小为1![\times](https://private.codecogs.com/gif.latex?%5Ctimes)1的卷积核进行卷积预测，k为预设边界框（bounding box prior）的个数（k默认取3），c为预测目标的类别数，其中4k个参数负责预测目标边界框的偏移量，k个参数负责预测目标边界框内包含目标的概率，ck个参数负责预测这k个预设边界框对应c个目标类别的概率。
 
 ![image-20200907155639116](image/image-20200907155639116.png)
 
@@ -227,3 +227,149 @@ class YOLOVision3Net(nn.Module):
 ![image-20200909152056900](image/image-20200909152056900.png)
 
 将导出的文件，程序解析为文本格式。
+
+### （4）xml文档解析
+
+导入cElementTree模块
+
+```python
+from xml.etree import cElementTree as ET
+```
+
+打开该文件，进行解析
+
+```python
+tree = ET.parse(file)
+```
+
+读取该文件包含的文件名
+
+```python
+name = tree.findtext('filename')
+```
+
+循环迭代里面的子项目
+
+```python
+for obj in tree.iter('object')
+```
+
+再从子项目里，读取数据：
+
+```python
+x1 = obj.findtext('bndbox/xmin')
+y1 = obj.findtext('bndbox/ymin')
+x2 = obj.findtext('bndbox/xmax')
+y2 = obj.findtext('bndbox/ymax')
+```
+
+### （5）图片处理
+
+将图片缩放为416X416的大小，等比缩放，短边部分用黑框代替。
+
+对应坐标换算为处理后的图片上的坐标。
+
+
+
+### （6）筛选候选框
+
+将变换后的，处理出来的坐标，提取出每一个目标框的长宽，进行kmean算法，聚类得到9种框。
+
+以交并比来判断距离：
+$$
+dist = 1-IOU
+$$
+依次为依据，进行优化[P3Kmeans.py](project3/P3Kmeans.py)
+
+```python
+for row in range(rows):
+    distances[row] = 1 - iou(boxes[row], big_brothers)
+```
+
+聚类步骤：
+
+1. 首先输入k的值，即我们希望将数据集经过聚类得到k个分组。
+2.  从数据集中随机选择k个数据点作为初始老大哥（质心，Centroid）
+3. 对集合中每一个小弟，计算与每一个老大哥的距离（距离的含义后面会讲），离哪个老大哥距离近，就跟定哪个老大哥。
+4.  这时每一个老大哥手下都聚集了一票小弟，这时候召开人民代表大会，每一群选出新的老大哥（其实是通过算法选出新的质心）。
+
+5.  如果新大哥和老大哥之间的距离小于某一个设置的阈值（表示重新计算的质心的位置变化不大，趋于稳定，或者说收敛），可以认为我们进行的聚类已经达到期望的结果，算法终止。
+6. 如果新大哥和老大哥距离变化很大，需要迭代3~5步骤。
+
+筛选出：
+
+```python
+boxes_base = {
+    52: ((29, 40), (15, 17), (65, 55)),
+    26: ((49, 105), (88, 176), (123, 99)),
+    13: ((311, 277), (158, 238), (262, 144))
+```
+
+
+
+### （7）训练模型
+
+训练置信度，使用二值交叉熵损失
+
+训练边框回归，使用均方差损失
+
+训练分类，使用交叉熵。
+
+标签做为**（N, H, W, 3, 6）**
+
+—3为每种尺度中的3中不同形状的框，
+
+—6包括，置信度，中心点X和Y，长宽缩放比P_w和P_y，分类
+
+做损失时，首先需将预测结果变换形状为**（N, H, W, 3, (4+1+c) k）**
+
+```python
+    def compute_loss(self, predict, target):
+
+        """标签形状为（N,H,W,3,6）"""
+        n, c, h, w = predict.shape
+        predict.permute(0, 2, 3, 1)
+        predict = predict.reshape(n, h, w, 3, -1)
+```
+
+得到标签中置信度为1的掩码和负样本掩码：
+
+```python
+mask_positive = target[:, :, :, :, 0] > 0
+mask_negative = target[:, :, :, :, 0] = 0
+'''索引出标签的正负样本'''
+target_positive = target[mask_positive]
+target_negative = target[mask_negative]
+'''索引出预测值的正负样本'''
+predict_positive = predict[mask_positive]
+predict_negative = predict[mask_negative]
+```
+
+同时，因为同一幅图，不是所有尺度都存在目标的，故需判断，并排除掉不存在目标的正样本，否则索引不出值，损失返回是Nan。
+
+```python
+number, _ = target_positive.shape
+if number>0:
+	loss_c_p = self.binary_cross_entropy(self.sigmoid(predict_positive[:, 0]), target_positive[:, 0])
+else:
+	loss_c_p = 0
+```
+
+同时，因为还得训练非目标的能力，索引，仅将正样本的损失置零即可。
+
+![image-20200914101523548](image/image-20200914101523548.png)
+
+因为训练图片尺度大，4G显存的显卡训练，每次仅仅能放入**3张图片**。
+
+
+
+### （8）模型使用
+
+模型使用，同训练时，几乎一致。
+
+同样将预测结果，先换轴，再尺寸变换，通过阈值筛选，然后反算回原图：
+
+再进行带类别的非极大值抑制即刻。
+
+[P3Explorer.py](project3/P3Explorer)
+
