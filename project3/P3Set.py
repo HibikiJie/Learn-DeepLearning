@@ -12,7 +12,7 @@ class Set:
             26: numpy.array([[49, 105], [88, 176], [123, 99]], dtype=numpy.float32),
             13: numpy.array([[311, 277], [158, 238], [262, 144]], dtype=numpy.float32)
         }
-        self.threshold = 0.99
+        self.threshold = 0.998
         self.category = ['person', 'head', 'hand', 'foot', 'aeroplane', 'tvmonitor', 'train', 'boat', 'dog', 'chair', 'bird',
             'bicycle', 'bottle', 'sheep', 'diningtable', 'horse', 'motorbike', 'sofa', 'cow', 'car', 'cat', 'bus',
             'pottedplant']

@@ -50,10 +50,10 @@ class GenerateVerifyCode:
 
 
 if __name__ == '__main__':
-    save_path = 'D:/data/chapter6/train'
+    save_path = 'D:/data/chapter6/test'
     a = GenerateVerifyCode()
 
-    for i in range(50000):
+    for i in range(2000):
         image, name = a.genervericode()
         image_name = f'{save_path}/{name}.{i}.jpg'
         image.save(image_name)

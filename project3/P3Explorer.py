@@ -3,31 +3,34 @@ from project3.P3Set import Set
 import torch
 import numpy
 import cv2
+from time import time
 
 class Explorer:
 
-    def __init__(self):
+    def __init__(self, is_cuda=False):
         self.set = Set()
-        # self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         self.device = torch.device('cpu')
         self.net = YOLOVision3Net(out_channels=84)
-        self.net.load_state_dict(torch.load('D:/data/object3/netparm/net.pth'))
+        self.net.load_state_dict(torch.load('D:/data/object3/netparm/netv3.pth'))
         self.net.eval()
 
-
     def explore(self, input_):
+        start = time()
         input_ = torch.from_numpy(input_).float() / 255
         input_ = input_.permute(2, 0, 1).unsqueeze(0)
         input_ = input_.to(self.device)  # 数据传入处理设备
 
         '''模型预测'''
         predict1, predict2, predict3 = self.net(input_)
+        print('cost_time1:', time() - start)
         boxes1, category1 = self.select(predict1.detach().cpu().numpy(), 32, 13)
         boxes2, category2 = self.select(predict2.detach().cpu().numpy(), 16, 26)
         boxes3, category3 = self.select(predict3.detach().cpu().numpy(), 8, 52)
         boxes = numpy.vstack((boxes1, boxes2, boxes3))
         category = numpy.hstack((category1, category2, category3))
         boxes, category = self.nms_with_category(boxes, category)
+        print('cost_time2:',time()-start)
         return boxes, category
 
     def select(self, predict, len_side, fm_size):
@@ -39,7 +42,7 @@ class Explorer:
         返回:
 
         """
-        n, h, w ,c,_= predict.shape
+        n, h, w, c, _ = predict.shape
 
         '''形状变换'''
 
@@ -77,7 +80,7 @@ class Explorer:
 
     def nms_with_category(self, boxes, categorys):
         if boxes.size == 0:
-            return numpy.array([]),numpy.array([])
+            return numpy.array([]), numpy.array([])
         """根据类别的不同，进行非极大值抑制"""
         picked_boxes = []
         picked_category = []
@@ -117,24 +120,27 @@ class Explorer:
         return intersection_area / numpy.minimum(area1, area2)
 
     def sigmoid(self, x):
-        return 1.0 / (1 + numpy.exp(-x))
+        x = torch.from_numpy(x)
+        x = torch.sigmoid(x)
+        return x.numpy()
 
 
 if __name__ == '__main__':
     explorer = Explorer()
-    image = cv2.imread('D:/data/object3/dataset2/2007_000042.jpg')
-    image_tensor = torch.from_numpy(image).float() / 255
-    image_tensor = image_tensor.permute(2, 0, 1)
+    set1 = Set()
+    image = cv2.imread('D:/data/object3/dataset2/2007_000243.jpg')
     boxes = explorer.explore(image)
     print(boxes)
-    for box in boxes[0]:
+
+    for box, index in zip(boxes[0], boxes[1]):
+        name = set1.category[index]
         x1 = int(box[1])
         y1 = int(box[2])
         x2 = int(box[3])
         y2 = int(box[4])
-        image=cv2.rectangle(image,(x1,y1),(x2,y2),(0,0,255),1)
+        image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 1)
+        image = cv2.putText(image, name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         # image = cv2.resize(image,None,fx=2,fy=2)
-    cv2.imshow('JK',image)
+    cv2.imshow('JK', image)
     cv2.waitKey(0)
-

@@ -74,7 +74,7 @@ class Trainer:
         else:
             loss_c_p = 0
         loss_c_n = self.binary_cross_entropy(self.sigmoid(predict_negative[:, 0]), target_negative[:, 0])
-        loss_c = 0.1 * loss_c_n + 0.9 * loss_c_p
+        loss_c = loss_c_n + loss_c_p
 
         '''边框回归'''
         if number>0:
