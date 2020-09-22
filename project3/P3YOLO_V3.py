@@ -2,6 +2,7 @@ from torch import nn
 import torch
 import thop
 
+
 class ConvolutionLayer(nn.Module):
     """
     卷积层，包含了’卷积‘、‘BatchNorm批归一化’、‘PReLU激活函数’
@@ -14,7 +15,8 @@ class ConvolutionLayer(nn.Module):
         padding：填充像素的多少
         bias：是否添加偏移
     """
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=False,groups=1):
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=False, groups=1):
         super(ConvolutionLayer, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -49,6 +51,7 @@ class DownSampling(nn.Module):
         in_channels：输入通道数；
         out_channels：输出通道数。
     """
+
     def __init__(self, in_channels, out_channels):
         super(DownSampling, self).__init__()
         self.in_channels = in_channels
@@ -66,6 +69,7 @@ class ResidualBlock(nn.Module):
     参数：
         in_channels：输入通道数，输出通道数与输入通道数保持一致。
     """
+
     def __init__(self, in_channels):
         super(ResidualBlock, self).__init__()
         self.in_channels = in_channels
@@ -98,6 +102,7 @@ class ConvolutionSet(nn.Module):
         in_channels：输入通道数；
         out_channels：输出通道数。
     """
+
     def __init__(self, in_channels, out_channels):
         super(ConvolutionSet, self).__init__()
         self.in_channels = in_channels
@@ -106,7 +111,7 @@ class ConvolutionSet(nn.Module):
             ConvolutionLayer(in_channels, out_channels, 1),
             ConvolutionLayer(out_channels, in_channels, 3, padding=1, groups=self.out_channels),
             ConvolutionLayer(in_channels, out_channels, 1),
-            ConvolutionLayer(out_channels, in_channels, 3, padding=1,groups=self.out_channels),
+            ConvolutionLayer(out_channels, in_channels, 3, padding=1, groups=self.out_channels),
             ConvolutionLayer(in_channels, out_channels, 1)
         )
 
@@ -119,6 +124,7 @@ class UpSimpling(nn.Module):
     上采样，这里使用机器学习的临近值插值法，进行上采样。
     因为深层的特征信息量不足，同时需要与更大尺寸的特征图做cat，故上采样。
     """
+
     def __init__(self):
         super(UpSimpling, self).__init__()
 
@@ -134,6 +140,7 @@ class YOLOVision3Net(nn.Module):
         out_channels：输出通道数。此数字为(4+1+c)*k；
         k为一个尺度有多少的检测框，c为检测的类别数，4为边框回归（中心点，长宽），1为是否有目标的置信度。
     """
+
     def __init__(self, out_channels=84):
         super(YOLOVision3Net, self).__init__()
         self.out_channels = out_channels
@@ -187,8 +194,8 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，大尺度目标的输出网络层'''
         self.predict1 = nn.Sequential(
-            ConvolutionLayer(512, 1024, 3, padding=1,groups=512),
-            nn.Conv2d(1024,self.out_channels,1,1,0)
+            ConvolutionLayer(512, 1024, 3, padding=1, groups=512),
+            nn.Conv2d(1024, self.out_channels, 1, 1, 0)
         )
 
         '''实例化，13x13变换至26x26的上采样，网络层'''
@@ -202,8 +209,8 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，中尺度目标的输出网络层'''
         self.predict2 = nn.Sequential(
-            ConvolutionLayer(256, 512, 3, padding=1,groups=256),
-            nn.Conv2d(512,self.out_channels,1)
+            ConvolutionLayer(256, 512, 3, padding=1, groups=256),
+            nn.Conv2d(512, self.out_channels, 1)
         )
 
         '''实例化，26x26变换至52x52的上采样，网络层'''
@@ -217,12 +224,11 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，小尺度目标的输出网络层'''
         self.predict3 = nn.Sequential(
-            ConvolutionLayer(128, 256, 3, padding=1,groups=128),
-            nn.Conv2d(256,self.out_channels,1)
+            ConvolutionLayer(128, 256, 3, padding=1, groups=128),
+            nn.Conv2d(256, self.out_channels, 1)
         )
 
     def forward(self, input_):
-
         """获得52x52的特征图"""
         feature_map52x52 = self.feature_map52x52(input_)
 
@@ -251,12 +257,15 @@ class YOLOVision3Net(nn.Module):
         '''侦测52x52的特征图，并通过输出层输出结果'''
         con_set_52 = self.con_set52x52(concatenated52x52)
         predict3 = self.predict3(con_set_52)
-        return predict1.permute(0, 2, 3, 1).reshape(-1, 13, 13, 3, self.out_channels//3), predict2.permute(0, 2, 3, 1).reshape(-1, 26, 26, 3, self.out_channels//3), predict3.permute(0, 2, 3, 1).reshape(-1, 52, 52, 3, self.out_channels//3)
+        return (predict1.permute(0, 2, 3, 1).reshape(-1, 13, 13, 3, self.out_channels // 3),
+                predict2.permute(0, 2, 3, 1).reshape(-1, 26, 26, 3, self.out_channels // 3),
+                predict3.permute(0, 2, 3, 1).reshape(-1, 52, 52, 3,self.out_channels // 3)
+                )
 
 
 if __name__ == '__main__':
     yolo3 = YOLOVision3Net(45)
-    torch.save(yolo3.state_dict(),'yolo.pth')
+    torch.save(yolo3.state_dict(), 'yolo.pth')
     print(yolo3)
     x = torch.randn(1, 3, 416, 416)
     # a = thop.profile(yolo3,(x,))

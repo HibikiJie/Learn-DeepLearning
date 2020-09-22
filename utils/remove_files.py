@@ -1,6 +1,6 @@
 import os
 
-path = 'D:/data/object2/dataset'
+path = 'D:/data/chapter6/test'
 
 
 def finde_dir(path):

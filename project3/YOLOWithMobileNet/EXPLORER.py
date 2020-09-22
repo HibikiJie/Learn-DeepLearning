@@ -1,18 +1,20 @@
-from project3.P3YOLO_V3 import YOLOVision3Net
-from project3.P3Set import Set
+from project3.YOLOWithMobileNet.MoblieNetV2 import MobileNetV2
+from project3.YOLOWithMobileNet.SET import Set
 import torch
 import numpy
 import cv2
 from time import time
 import os
+
+
 class Explorer:
 
     def __init__(self, is_cuda=False):
         self.set = Set()
         self.device = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         self.device = torch.device('cpu')
-        self.net = YOLOVision3Net(out_channels=84)
-        self.net.load_state_dict(torch.load('D:/data/object3/netparm/netv3.pth'))
+        self.net = MobileNetV2()
+        self.net.load_state_dict(torch.load('D:/data/object3/netparm/netmobilev1.pth'))
         self.net.eval()
 
     def explore(self, input_):
@@ -126,6 +128,7 @@ class Explorer:
 
 
 if __name__ == '__main__':
+
     explorer = Explorer()
     set1 = Set()
     for file_name in os.listdir('D:/data/object3/dataset'):
@@ -133,6 +136,7 @@ if __name__ == '__main__':
         image = cv2.imread(f'D:/data/object3/dataset/{file_name}')
         boxes = explorer.explore(image)
         print(boxes)
+
         for box, index in zip(boxes[0], boxes[1]):
             name = set1.category[index]
             x1 = int(box[1])
@@ -141,8 +145,7 @@ if __name__ == '__main__':
             y2 = int(box[4])
             image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 1)
             image = cv2.putText(image, name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
-
-            # image = cv2.resize(image,None,fx=2,fy=2)
+        print(time()-s)
         cv2.imshow('JK', image)
         if cv2.waitKey(0) == ord('c'):
             continue
