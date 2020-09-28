@@ -14,7 +14,7 @@ class Explorer:
         self.device = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         self.device = torch.device('cpu')
         self.net = MobileNetV2()
-        self.net.load_state_dict(torch.load('D:/data/object3/netparm/netmobilev1.pth'))
+        self.net.load_state_dict(torch.load('D:/data/object3/netparm/net (2).pth'))
         self.net.eval()
 
     def explore(self, input_):
