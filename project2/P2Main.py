@@ -42,6 +42,11 @@ class IdentifyFace:
         self.explorer = Explorer(self.is_cuda)
         self.feature_data_set = FeaturesDataSet()
         self.feature_data_loader = DataLoader(self.feature_data_set, len(self.feature_data_set), False)
+        self.features = None
+        self.target = None
+        for features, target in self.feature_data_loader:
+            self.features = features
+            self.target = target
 
     def get_boxes(self, image_RGB):
         boxes = self.explorer.explore(image_RGB)
@@ -113,16 +118,15 @@ class IdentifyFace:
                 image_tensor = torch.from_numpy(
                     numpy.transpose(image_crop, (2, 0, 1)) / 255).float().unsqueeze(0).to(self.device)
                 feature = self.net(image_tensor).cpu()
-                for features, target in self.feature_data_loader:
-                    cos_thetas = torch.cosine_similarity(feature, features, dim=1)
-                    max_index = torch.argmax(cos_thetas)
+                cos_thetas = torch.cosine_similarity(feature, self.features, dim=1)
+                max_index = torch.argmax(cos_thetas)
 
-                    cos_theta = cos_thetas[max_index]
-                    print(cos_theta.item())
-                    if cos_theta >= 0.80:
-                        name = targets[str(target[max_index].item())]
-                        # print(name,cos_theta.item())
-                        information.append((name, x1, y1, x2, y2, cos_theta.item()))
+                cos_theta = cos_thetas[max_index]
+                print(cos_theta.item())
+                if cos_theta >= 0.80:
+                    name = targets[str(self.target[max_index].item())]
+                    # print(name,cos_theta.item())
+                    information.append((name, x1, y1, x2, y2, cos_theta.item()))
         return information
 
 

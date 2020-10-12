@@ -13,7 +13,7 @@ class Set:
             13: numpy.array([[311, 277], [158, 238], [262, 144]], dtype=numpy.float32)
         }
         self.threshold = 0.998
-        self.category = ['person', 'head', 'hand', 'foot', 'aeroplane', 'tvmonitor', 'train', 'boat', 'dog', 'chair', 'bird',
+        self.category = ['person', 'aeroplane', 'tvmonitor', 'train', 'boat', 'dog', 'chair', 'bird',
             'bicycle', 'bottle', 'sheep', 'diningtable', 'horse', 'motorbike', 'sofa', 'cow', 'car', 'cat', 'bus',
             'pottedplant']
         self.num_category = len(self.category)

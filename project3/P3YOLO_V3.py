@@ -33,7 +33,6 @@ class ConvolutionLayer(nn.Module):
                 stride=self.stride,
                 padding=self.padding,
                 bias=self.bias,
-                groups=self.groups
             ),
             nn.BatchNorm2d(self.out_channels),
             nn.LeakyReLU(0.1)
@@ -85,7 +84,6 @@ class ResidualBlock(nn.Module):
                 self.in_channels,
                 kernel_size=3,
                 padding=1,
-                groups=self.mid_channels
             )
         )
 
@@ -109,9 +107,9 @@ class ConvolutionSet(nn.Module):
         self.out_channels = out_channels
         self.con_set = nn.Sequential(
             ConvolutionLayer(in_channels, out_channels, 1),
-            ConvolutionLayer(out_channels, in_channels, 3, padding=1, groups=self.out_channels),
+            ConvolutionLayer(out_channels, in_channels, 3, padding=1),
             ConvolutionLayer(in_channels, out_channels, 1),
-            ConvolutionLayer(out_channels, in_channels, 3, padding=1, groups=self.out_channels),
+            ConvolutionLayer(out_channels, in_channels, 3, padding=1),
             ConvolutionLayer(in_channels, out_channels, 1)
         )
 
@@ -194,7 +192,7 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，大尺度目标的输出网络层'''
         self.predict1 = nn.Sequential(
-            ConvolutionLayer(512, 1024, 3, padding=1, groups=512),
+            ConvolutionLayer(512, 1024, 3, padding=1),
             nn.Conv2d(1024, self.out_channels, 1, 1, 0)
         )
 
@@ -209,7 +207,7 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，中尺度目标的输出网络层'''
         self.predict2 = nn.Sequential(
-            ConvolutionLayer(256, 512, 3, padding=1, groups=256),
+            ConvolutionLayer(256, 512, 3, padding=1),
             nn.Conv2d(512, self.out_channels, 1)
         )
 
@@ -224,7 +222,7 @@ class YOLOVision3Net(nn.Module):
 
         '''实例化，小尺度目标的输出网络层'''
         self.predict3 = nn.Sequential(
-            ConvolutionLayer(128, 256, 3, padding=1, groups=128),
+            ConvolutionLayer(128, 256, 3, padding=1),
             nn.Conv2d(256, self.out_channels, 1)
         )
 

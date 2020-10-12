@@ -12,7 +12,7 @@ class Explorer:
         self.device = torch.device('cuda:0' if torch.cuda.is_available() and is_cuda else 'cpu')
         self.device = torch.device('cpu')
         self.net = YOLOVision3Net(out_channels=84)
-        self.net.load_state_dict(torch.load('D:/data/object3/netparm/netv3.pth'))
+        self.net.load_state_dict(torch.load('D:/data/object3/netparm/net1008.pth'))
         self.net.eval()
 
     def explore(self, input_):
@@ -126,7 +126,7 @@ class Explorer:
 
 
 if __name__ == '__main__':
-    explorer = Explorer()
+    explorer = Explorer(True)
     set1 = Set()
     for file_name in os.listdir('D:/data/object3/dataset'):
         s = time()
