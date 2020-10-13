@@ -13,6 +13,7 @@ def main():
     boxes = (None, None)
     a_w = 0
     a_h = 0
+    i=0
     while True:
         success, image = vedio.read()
         if success:
@@ -28,7 +29,9 @@ def main():
             y2 = int(box[4] * a_h)
             image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 1)
             image = cv2.putText(image, name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 1)
-        image = cv2.resize(image, None, fx=2, fy=2)
+        # image = cv2.resize(image, None, fx=2, fy=2)
+        cv2.imwrite(f'D:/data/object3/1/{i}.jpg',image)
+        i+=1
         cv2.imshow('JK', image)
         cv2.waitKey(1)
 

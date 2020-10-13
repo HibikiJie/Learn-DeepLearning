@@ -193,22 +193,20 @@ while True:
 
 几个图片的效果展示：
 
-|                          风格图片                           |                       生成图片                        |
-| :---------------------------------------------------------: | :---------------------------------------------------: |
-|       <img src="s1.jpg" alt="s1" style="zoom:50%;" />       |    <img src="v2.jpg" alt="v2" style="zoom:50%;" />    |
-|                              /                              |    <img src="v3.jpg" alt="v3" style="zoom:50%;" />    |
-|                              /                              |    <img src="v4.jpg" alt="v4" style="zoom:50%;" />    |
-|                              /                              | <img src="z7000.jpg" alt="z7000" style="zoom:50%;" /> |
-| <img src="hosizora.jpg" alt="hosizora" style="zoom:50%;" /> |                     ![v5](v5.jpg)                     |
-|                              /                              |    <img src="v7.jpg" alt="v7" style="zoom:50%;" />    |
-|    <img src="nahan.jpg" alt="nahan" style="zoom:50%;" />    |    <img src="v8.jpg" alt="v8" style="zoom:50%;" />    |
-|        <img src="b.jpg" alt="b" style="zoom:50%;" />        |    <img src="v9.jpg" alt="v9" style="zoom:50%;" />    |
-|                              /                              |   <img src="v11.jpg" alt="v11" style="zoom:50%;" />   |
-|       <img src="c2.jpg" alt="c2" style="zoom:50%;" />       |  <img src="4000.jpg" alt="4000" style="zoom:50%;" />  |
-|        <img src="2.jpg" alt="2" style="zoom:50%;" />        |   <img src="v12.jpg" alt="v12" style="zoom:50%;" />   |
-|        <img src="3.jpg" alt="3" style="zoom:50%;" />        |   <img src="v13.jpg" alt="v13" style="zoom:50%;" />   |
-|        <img src="4.jpg" alt="4" style="zoom:50%;" />        |   <img src="v14.jpg" alt="v14" style="zoom:50%;" />   |
+|                           风格图片                           |                           生成图片                           |
+| :----------------------------------------------------------: | :----------------------------------------------------------: |
+| <img src="https://img-blog.csdnimg.cn/20201013094015480.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center"  /> | <img src="https://img-blog.csdnimg.cn/20201013094015429.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"  /> |
+|                              /                               | <img src="https://img-blog.csdnimg.cn/20201013094015436.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"  /> |
+|                              /                               | <img src="https://img-blog.csdnimg.cn/20201013094015431.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"  /> |
+|                              /                               | <img src="https://img-blog.csdnimg.cn/20201013094426880.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"  /> |
+| <img src="https://img-blog.csdnimg.cn/20201013094015548.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"  /> | <img src="https://img-blog.csdnimg.cn/20201013094015363.jpg#pic_center" alt="在这里插入图片描述" style="zoom:200%;" /> |
+|                              /                               | <img src="https://img-blog.csdnimg.cn/20201013094015510.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" style="zoom:50%;" /> |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015469.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) /> | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015423.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015492.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015430.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+|                              /                               | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094921493.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015493.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015435.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015481.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015446.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015434.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015420.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
+| ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015540.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) | ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201013094015447.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center) |
 
 调整各个损失不同的比例系数，能够达到不同的效果。可酌情尝试。
-
-<img src="https://img-blog.csdnimg.cn/20201012181431670.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80ODg2NjQ1Mg==,size_16,color_FFFFFF,t_70#pic_center" alt="img" style="zoom:50%;" />

@@ -279,7 +279,7 @@ y2 = obj.findtext('bndbox/ymax')
 $$
 dist = 1-IOU
 $$
-依次为依据，进行优化[P3Kmeans.py](project3/P3Kmeans.py)
+以此为依据，进行优化[P3Kmeans.py](project3/P3Kmeans.py)
 
 ```python
 for row in range(rows):
