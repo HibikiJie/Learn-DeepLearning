@@ -5,6 +5,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 from tqdm import tqdm
 
+
 class Trainer:
 
     def __init__(self, Net=YOLOVision3Net):
@@ -69,7 +70,7 @@ class Trainer:
         predict_negative = predict[mask_negative]
 
         '''置信度损失'''
-        if number>0:
+        if number > 0:
             loss_c_p = self.binary_cross_entropy(self.sigmoid(predict_positive[:, 0]), target_positive[:, 0])
         else:
             loss_c_p = 0
@@ -77,17 +78,17 @@ class Trainer:
         loss_c = loss_c_n + loss_c_p
 
         '''边框回归'''
-        if number>0:
-            loss_box1 = self.mse_loss(self.sigmoid(predict_positive[:,1:3]),target_positive[:,1:3])
+        if number > 0:
+            loss_box1 = self.mse_loss(self.sigmoid(predict_positive[:, 1:3]), target_positive[:, 1:3])
             loss_box2 = self.mse_loss(predict_positive[:, 3:5], target_positive[:, 3:5])
 
             '''分类损失'''
             loss_class = self.ce_loss(predict_positive[:, 5:], target_positive[:, 5].long())
         else:
-            loss_box1=0
-            loss_box2=0
-            loss_class=0
-        return loss_c + (loss_box1+loss_box2) + loss_class
+            loss_box1 = 0
+            loss_box2 = 0
+            loss_class = 0
+        return loss_c + (loss_box1 + loss_box2) + loss_class
 
 
 if __name__ == '__main__':

@@ -32,8 +32,8 @@ class Trainer(object):
     def __init__(self, experience_pool_size, explore=0.8, foresight=0.9, is_cuda=True):
         self.device = torch.device('cuda:0' if is_cuda and torch.cuda.is_available() else 'cpu')
 
-        """加载《倒杆杆游戏》"""
-        self.game = gym.make('CartPole-v1')
+        """加载《开车车游戏》"""
+        self.game = gym.make('MountainCar-v0')
 
         """定义网络远系数、探索系数、经验池、经验池尺寸"""
         self.foresight = foresight
@@ -42,7 +42,7 @@ class Trainer(object):
         self.experience_pool_size = experience_pool_size
 
         """实例化网络、损失函数、优化器"""
-        self.q_net = DQNet(num_state=4, num_actions=2).to(self.device)
+        self.q_net = DQNet(num_state=2, num_actions=3).to(self.device)
         self.optimizer = torch.optim.Adam(self.q_net.parameters())
         self.loss_func = nn.MSELoss().to(self.device)
 
@@ -57,7 +57,7 @@ class Trainer(object):
     def __try_play(self):
         """游戏初始化，并获取初始状态。这里是开始一局游戏。"""
         state_t = self.game.reset()
-        R = 0
+
         """游戏循环，循环游戏的每一帧"""
         while True:
 
@@ -75,53 +75,44 @@ class Trainer(object):
             else:
                 """弹出一条经验值，"""
                 self.experience_pool.pop(0)
-                self.explore += 1e-4
-
-                """随机选择，看是否需要探索，否则由网络输出动作"""
+                self.explore += 1e-5
                 if random.random() > self.explore:
                     action = self.game.action_space.sample()
                 else:
                     _state_t = torch.tensor(state_t, dtype=torch.float32).unsqueeze(0).to(self.device)
                     action = self.q_net(_state_t.to(self.device))
-                    """根据最大价值，选择相应操作动作"""
                     action = torch.argmax(action.squeeze(0)).item()
 
-            """执行动作，获取回报和下一状态"""
             state_t_plus_1, reward, done, info = self.game.step(action)
 
-            """累加回报"""
-            R += reward
+            value = abs(state_t_plus_1[0]+0.5)+(15*state_t_plus_1[1])**2
 
-            """向经验池增加经验"""
-            self.experience_pool.append([state_t, R, action, state_t_plus_1, done])
+            self.experience_pool.append([state_t, value, action, state_t_plus_1, done])
             state_t = state_t_plus_1
             if done:
-                self.ave = 0.95 * self.ave + 0.05 * R
-                print(self.ave, R)
-                if self.ave >= 300:
+                self.ave = 0.95 * self.ave + 0.05 * value
+                print(self.ave, value)
+                if self.ave > 1.4:
                     self.is_render = True
-                    torch.save(self.q_net.state_dict(), 'q_net_CartPole.pth')
+                    torch.save(self.q_net.state_dict(), 'q_net_MountainCar1.pth')
                 break
 
     def __train(self):
         """训练过程"""
         if len(self.experience_pool) > self.experience_pool_size:
-            """从经验池、获取经验"""
             states, values, actions, states_next, dons = self.get_experience()
 
             """得到当前状态的估计值"""
             valuations = self.q_net(states)
             valuation = torch.gather(valuations, dim=1, index=actions)
 
-            """得到下一状态的估计值，并选择最大的估值"""
+            """得到下一状态的估计值"""
             valuations_next = self.q_net(states_next).detach()
             valuations_max = torch.max(valuations_next, dim=1, keepdim=True)[0]
 
-            """当前状态的目标估值按照Q函数计算"""
             target = values + (1 - dons) * valuations_max * self.foresight
-
-            """计算损失、优化"""
             loss = self.loss_func(valuation, target.detach())
+
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -146,30 +137,29 @@ class Trainer(object):
         dons = torch.tensor(dons).float().to(self.device)
         return states, values, actions, states_next, dons
 
-    def play(self):
-        self.q_net.load_state_dict(torch.load('q_net_CartPole.pth'))
-        for i_episode in range(20):
+    def play(self, frequency):
+        self.q_net.load_state_dict(torch.load('q_net_MountainCar.pth'))
+        for i_episode in range(frequency):
 
-            """游戏初始化"""
+            """游戏初始化,并展示游戏"""
             observation = self.game.reset()
-            self.game.render()
+            point = 0
             while True:
                 """显示游戏"""
                 self.game.render()
 
-                """获取动作"""
+                """从动作空间随机采样"""
                 action = self.q_net(torch.tensor(observation).float().unsqueeze(0).to(self.device))
                 action = torch.argmax(action.squeeze(0)).item()
-
                 """动作一步，返回环境，回报，游戏是否结束，信息"""
                 observation_, reward, done, info = self.game.step(action)
+                point += reward
                 observation = observation_
-                # print(observation, action, reward, observation_, done)
                 if done:
-                    print('game over', )
+                    print('Game over.You cost time:', -point)
                     break
 
 
 if __name__ == '__main__':
     trainer = Trainer(10000)
-    trainer.play()
+    trainer.play(20)

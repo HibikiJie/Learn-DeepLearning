@@ -16,18 +16,19 @@ class QNet(nn.Sequential):
 
 class Game:
 
-    def __init__(self, exp_pool_size, explore=0.9):
+    def __init__(self, exp_pool_size, explore=0.9, foresight=0.9):
+        """加载《倒杆杆游戏》"""
         self.env = gym.make('CartPole-v1')
 
+        """定义网络远系数、探索系数、经验池、经验池尺寸"""
+        self.foresight = 0.9
+        self.explore = explore
         self.exp_pool = []
         self.exp_pool_size = exp_pool_size
 
+        """实例化网络、损失函数、优化器"""
         self.q_net = QNet()
-
-        self.explore = explore
-
         self.loss_fn = nn.MSELoss()
-
         self.opt = optim.Adam(self.q_net.parameters())
 
     def __call__(self):

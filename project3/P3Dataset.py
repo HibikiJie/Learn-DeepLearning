@@ -5,6 +5,7 @@ from project3.P3Set import Set
 import numpy as np
 from math import log
 
+
 class Voc2012DataSet(Dataset):
 
     def __init__(self, image_path='D:/data/object3/dataset', path='D:/data/object3/train.txt'):
@@ -76,6 +77,7 @@ class Voc2012DataSet(Dataset):
                             trunk = [int(index_h), int(index_w), 1., offset_x, offset_y, log(ratio_w), log(ratio_h), target, i // 3,
                                      i % 3]
                     i += 1
+
             '''写入标签中'''
             # print(w,h)
             if trunk[8] == 0:
@@ -86,7 +88,8 @@ class Voc2012DataSet(Dataset):
                 targets_13[trunk[0], trunk[1], trunk[-1]] = torch.tensor(trunk[2:8])
         return image_tensor, targets_13, targets_26, targets_52
 
-    def calculate_iou(self, box1, box2):
+    @staticmethod
+    def calculate_iou(box1, box2):
         min_w = min(box1[0], box2[0])
         min_h = min(box1[1], box2[1])
         intersection = min_w * min_h

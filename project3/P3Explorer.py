@@ -5,7 +5,9 @@ import numpy
 import cv2
 from time import time
 import os
-class Explorer:
+
+
+class Explorer(object):
 
     def __init__(self, is_cuda=False):
         self.set = Set()
@@ -106,7 +108,8 @@ class Explorer:
 
         return numpy.vstack(picked_boxes), numpy.hstack(picked_category)
 
-    def calculate_iou(slef, box1, box2):
+    @staticmethod
+    def calculate_iou(box1, box2):
         area1 = (box1[3] - box1[1]) * (box1[4] - box1[2])
         area2 = (box2[:, 3] - box2[:, 1]) * (box2[:, 4] - box2[:, 2])
 
@@ -119,7 +122,8 @@ class Explorer:
             0, y2 - y1)
         return intersection_area / numpy.minimum(area1, area2)
 
-    def sigmoid(self, x):
+    @staticmethod
+    def sigmoid(x):
         x = torch.from_numpy(x)
         x = torch.sigmoid(x)
         return x.numpy()
