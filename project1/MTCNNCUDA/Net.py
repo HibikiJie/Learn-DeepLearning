@@ -24,6 +24,7 @@ class PNet(nn.Module):
         self.regression = nn.Conv2d(32, 4, 1)
         for param in self.parameters():
             param.requires_grad = False
+
     def forward(self, enter):
         enter = self.conv1(enter)
         return self.classification(enter), self.regression(enter)
@@ -110,7 +111,7 @@ class ONet(nn.Module):
         enter = self.fully_connect(self.convolution(enter).reshape(-1, 1152))
         return self.classification(enter), self.regression(enter)
 
-    def load_parameters(self,file_name='onet.pth'):
+    def load_parameters(self, file_name='onet.pth'):
         if os.path.exists(file_name):
             self.load_state_dict(torch.load(file_name))
             print('参数加载成功')

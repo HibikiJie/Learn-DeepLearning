@@ -1,7 +1,7 @@
 import gym
 
 """加载游戏"""
-env = gym.make('MountainCar-v0')
+env = gym.make('SpaceInvaders-ram-v0')
 for i_episode in range(20):
 
     """游戏初始化"""
@@ -15,8 +15,11 @@ for i_episode in range(20):
         action = env.action_space.sample()
         """动作一步，返回环境，回报，游戏是否结束，信息"""
         observation_, reward, done, info = env.step(action)
-        print(observation,action, reward, observation_, done)
+        print(action)
 
+        # exit()
+        # print(observation,action, reward, observation_, done)
+        # exit()
         if done:
             print("Episode finished after {} timesteps".format(t + 1))
             break
