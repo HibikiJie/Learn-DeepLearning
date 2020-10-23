@@ -141,13 +141,13 @@ def get_gram_matrix(f_map):
     if n == 1:
         f_map = f_map.reshape(c, h * w)
         gram_matrix = torch.mm(f_map, f_map.t())
-        return gram_matrix
+        return gram_matrix.div(c*h*w)
     else:
         raise ValueError('批次应该为1,但是传入的不为1')
 
 
 if __name__ == '__main__':
-    image_style = load_image('xinchuan.jpg').cuda()
+    image_style = load_image('2.jpg').cuda()
     net = VGG19().cuda()
     g_net = TransNet().cuda()
     # summary_writer = SummaryWriter('D:/data/chapter7/logs')
@@ -192,7 +192,7 @@ if __name__ == '__main__':
             loss_c = loss_c3
 
             """总损失"""
-            loss = loss_c + 0.00000003 * loss_s
+            loss = loss_c + 22000000 * loss_s
 
             """清空梯度、计算梯度、更新参数"""
             optimizer.zero_grad()
