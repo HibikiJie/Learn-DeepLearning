@@ -47,19 +47,22 @@
 
 
 
-| Project | Topic                                                        | Description        |
-| ------- | ------------------------------------------------------------ | ------------------ |
-| 1       | [MTCNN](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Project%201.md) | 多任务级联卷积网络 |
-| 2       | 人脸识别                                                     | 识别人脸           |
-| 3       | YOLO                                                         | 多目标多类别检测   |
+| Project | Topic                                                        | Description         |
+| ------- | ------------------------------------------------------------ | ------------------- |
+| 1       | [MTCNN](https://github.com/HibikiJie/Learn-DeepLearning/blob/master/Project%201.md) | 多任务级联卷积网络  |
+| 2       | 人脸识别                                                     | 识别人脸            |
+| 3       | YOLO                                                         | 多目标多类别检测    |
+| 4       | YOLO_v4&YOLO_v5                                              | YOLO_v4&YOLO_v5详解 |
+
+
 
 
 
 # Notes
 
-| Index |    Comment     |
-| :---- | :------------: |
-| 1.    | 全连接神经网络 |
-| 2.    |                |
-| 3.    |                |
+| Index |  Comment   |
+| :---- | :--------: |
+| 1.    | 读取压缩包 |
+| 2.    |  整体概要  |
+| 3.    |            |
 

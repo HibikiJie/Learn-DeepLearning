@@ -176,7 +176,6 @@ def check(x, torch_out, onnx):
     def to_numpy(tensor):
         return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
-
     # compute ONNX Runtime output prediction
     ort_inputs = {'input': to_numpy(x)}
     ort_outs = ort_session.run(None, ort_inputs)

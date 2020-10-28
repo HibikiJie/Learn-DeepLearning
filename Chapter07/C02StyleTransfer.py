@@ -80,6 +80,7 @@ def get_gram_matrix(f_map):
         raise ValueError('批次应该为1,但是传入的不为1')
 
 
+
 # def transfer():
 #
 #     import torch

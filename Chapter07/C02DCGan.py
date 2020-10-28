@@ -37,16 +37,16 @@ class DNet(nn.Module):
         super(DNet, self).__init__()
         self.layers = nn.Sequential(
             nn.Conv2d(3, 64, 5, 3, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            nn.InstanceNorm2d(64),
             nn.LeakyReLU(0.2),
             nn.Conv2d(64, 128, 4, 2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.LeakyReLU(0.2),
             nn.Conv2d(128, 256, 4, 2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
+            nn.InstanceNorm2d(256),
             nn.LeakyReLU(0.2),
             nn.Conv2d(256, 512, 4, 2, padding=1, bias=False),
-            nn.BatchNorm2d(512),
+            nn.InstanceNorm2d(512),
             nn.LeakyReLU(0.2),
             nn.Conv2d(512, 1, 4, 1, padding=0, bias=False),
             # nn.Sigmoid()去掉，训练更快
@@ -62,16 +62,16 @@ class GNet(nn.Module):
         super(GNet, self).__init__()
         self.layers = nn.Sequential(
             nn.ConvTranspose2d(128,512,kernel_size=4,stride=1,padding=0,bias=False),
-            nn.BatchNorm2d(512),
+            nn.InstanceNorm2d(512),
             nn.ReLU(),
             nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
+            nn.InstanceNorm2d(256),
             nn.ReLU(),
             nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            nn.InstanceNorm2d(64),
             nn.ReLU(),
             nn.ConvTranspose2d(64, 3, kernel_size=5, stride=3, padding=1, bias=False),
             nn.Tanh()
@@ -117,9 +117,9 @@ class Trainer:
         self.batch_size = 100
         self.data_loader = DataLoader(self.data_set, self.batch_size, True)
         self.net = DCGan().cuda()
-        self.d_optimizer = torch.optim.Adam(self.net.d_net.parameters(), 0.0002,betas=(0.5,0.999))
-        self.g_optimizer = torch.optim.Adam(self.net.g_net.parameters(), 0.0002,betas=(0.5,0.999))
-        self.net.load_state_dict(torch.load(f'D:/data/chapter7/DCGannet/23.pth'))
+        self.d_optimizer = torch.optim.SGD(self.net.d_net.parameters(),lr=0.001)
+        self.g_optimizer = torch.optim.SGD(self.net.g_net.parameters(),lr=0.001)
+        self.net.load_state_dict(torch.load(f'D:/data/chapter7/DCGannet/3v2.pth'))
 
     def train(self):
         for epoch in range(100000):
@@ -138,7 +138,7 @@ class Trainer:
                 loss_g.backward()
                 self.g_optimizer.step()
                 print(epoch, i, loss_d.item(), loss_g.item())
-                if i % 10 == 0:
+                if i % 100 == 0:
                     noise = torch.normal(0, 0.02, (self.batch_size, 128, 1, 1)).cuda()
                     image = self.net.forward(noise)
                     save_image(image, f'D:/data/chapter7/Gimage/{epoch}v2.jpg', 10, normalize=True, range=(-1, 1))
