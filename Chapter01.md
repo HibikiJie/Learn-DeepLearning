@@ -74,7 +74,7 @@ $$
 
 如果选择 tanh 作为隐藏层的激活函数，效果几乎总是比 sigmoid 函数要好，因为 tanh 函数的输出介于 -1 与 1 之间，激活函数的平均值就更接近于 0，而不是 0.5，这让下一层的学习更加方便一点。
 
-和 sigmoid 函数类似，当因变量 zzz 取值为 0 时，tanh 曲线的斜率（梯度）最大，计算出来为 1。当因变量 zzz 的取值越大或越小时，sigmoid 曲线的斜率（梯度）就越小。所以 tanh 也会面临和 sigmiod 函数同样的问题：当 zzz 很大或很小时，tanh 曲线的斜率（梯度）几乎为零，这对于执行梯度下降算法十分不利。
+和 sigmoid 函数类似，当因变量 z 取值为 0 时，tanh 曲线的斜率（梯度）最大，计算出来为 1。当因变量 zzz 的取值越大或越小时，sigmoid 曲线的斜率（梯度）就越小。所以 tanh 也会面临和 sigmiod 函数同样的问题：当 z 很大或很小时，tanh 曲线的斜率（梯度）几乎为零，这对于执行梯度下降算法十分不利。
 
 #### 3）ReLU函数
 
@@ -155,7 +155,7 @@ $$
 
 创建一个类，继承于Dataset。，
 
-其中，只重载`__init__`函数、`__len__` 函数、`__getitem__`函数
+其中，需要重载`__init__`函数、`__len__` 函数、`__getitem__`函数
 
 示例：
 
@@ -354,8 +354,8 @@ class Net_v1(torch.nn.Module):
 
 ```python
 if __name__ == '__main__':
-        net = Net_v1()# 实例化网络模型
-    x = torch.randn(3,784)# 假定一个输入数据，该数据有三个批次，每个批次，具有784个维度的数值
+    net = Net_v1()  # 实例化网络模型
+    x = torch.randn(3,784)  # 假定一个输入数据，该数据有三个批次，每个批次，具有784个维度的数值
     print(net(x)) # 打印网络的输出
     print(net(x).shape) # 打印网络模型输出的形状
 ```
@@ -792,7 +792,7 @@ os.chdir("/content/gdrive/My Drive/your_progect")
 
 
 
-### 8、补充
+### 10、补充
 
 torch的`torchvision.transforms.ToPILImage()`类可以提供一个类，将tensor类型的C X H X W数据转变为PIL的图片对象
 

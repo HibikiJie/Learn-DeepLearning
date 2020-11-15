@@ -54,6 +54,6 @@ while True:
             break
     else:
         break
-save_mp4('fww.mp4',images,50)
+# save_mp4('fww.mp4',images,50)
 
 

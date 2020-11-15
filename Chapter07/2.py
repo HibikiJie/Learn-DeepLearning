@@ -1,5 +1,8 @@
 import torch
-import cv2
-
-image = cv2.imread('xinchuan.jpg')
-cv2.imwrite('xinchuan.jpg',image[0:360,0:360])
+f = torch.tensor([1,2,1], dtype=torch.float32)
+print(f[:, None])
+f = f[:, None] * f[None, :]
+print(f)
+f = f[None, None]
+f = f / f.sum()
+print(f)
