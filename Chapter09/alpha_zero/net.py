@@ -6,6 +6,7 @@ class AlphaZero(nn.Module):
 
     def __init__(self, board_size):
         super(AlphaZero, self).__init__()
+        """棋盘尺寸"""
         self.board_size = board_size
         """特征提取主干网络"""
         self.main_net = nn.Sequential(
