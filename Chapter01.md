@@ -153,7 +153,7 @@ $$
 
 使用pytorch的torch.utils.data.Dataset处理自己的数据集。
 
-创建一个类，继承于Dataset。，
+创建一个类，继承于Dataset。
 
 其中，需要重载`__init__`函数、`__len__` 函数、`__getitem__`函数
 

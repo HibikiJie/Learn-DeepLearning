@@ -1,7 +1,7 @@
 from torch import nn
 import torch
 
-
+torch.optim.Adam
 class AlphaZero(nn.Module):
 
     def __init__(self, board_size):
